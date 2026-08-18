@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silver Sands HRMS - User Manual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 30px;
+            color: #1a2a4a;
+            line-height: 1.6;
+        }
+        
+        .manual-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+            padding: 45px 50px;
+        }
+        
+        .manual-header {
+            text-align: center;
+            border-bottom: 3px solid #c9a84c;
+            padding-bottom: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .manual-header h1 {
+            font-size: 30px;
+            color: #1a2a4a;
+            margin-bottom: 5px;
+        }
+        
+        .manual-header .subtitle {
+            font-size: 16px;
+            color: #6a7a8a;
+        }
+        
+        .manual-header .company {
+            font-size: 13px;
+            color: #c9a84c;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+        
+        .manual-meta {
+            display: flex;
+            justify-content: space-between;
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .manual-meta .meta-item {
+            font-size: 13px;
+            color: #495057;
+        }
+        
+        .manual-meta .meta-item strong {
+            color: #1a2a4a;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+        }
+        
+        .section h2 {
+            font-size: 22px;
+            color: #1a2a4a;
+            border-left: 4px solid #c9a84c;
+            padding-left: 15px;
+            margin-bottom: 18px;
+        }
+        
+        .section h3 {
+            font-size: 17px;
+            color: #2c4a6e;
+            margin-top: 22px;
+            margin-bottom: 10px;
+        }
+        
+        .section h4 {
+            font-size: 14px;
+            color: #495057;
+            margin-top: 15px;
+            margin-bottom: 6px;
+        }
+        
+        .section p {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        
+        .section ul, .section ol {
+            padding-left: 25px;
+            margin-bottom: 12px;
+        }
+        
+        .section ul li, .section ol li {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .highlight-box {
+            background: #f8f9fa;
+            border-left: 4px solid #c9a84c;
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .highlight-box strong {
+            color: #1a2a4a;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .warning-box strong {
+            color: #856404;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .info-box strong {
+            color: #0c5460;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .success-box strong {
+            color: #155724;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin: 15px 0;
+        }
+        
+        table thead th {
+            background: #1a2a4a;
+            color: white;
+            padding: 10px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        table tbody td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-primary { background: #cce5ff; color: #004085; }
+        .badge-gold { background: #f5edda; color: #1a2a4a; }
+        
+        .step {
+            display: flex;
+            gap: 15px;
+            margin: 12px 0;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            background: #1a2a4a;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-content strong {
+            color: #1a2a4a;
+        }
+        
+        .icon-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .icon-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .icon-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .icon-list .icon {
+            width: 24px;
+            color: #c9a84c;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            color: #1a2a4a;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        
+        .toc ul li a {
+            color: #2c4a6e;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 4px 8px;
+            display: block;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .toc ul li a:hover {
+            background: #e9ecef;
+        }
+        
+        .keyboard-shortcut {
+            background: #f0f0f0;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-dot.green { background: #28a745; }
+        .status-dot.red { background: #dc3545; }
+        .status-dot.orange { background: #ff9800; }
+        .status-dot.blue { background: #17a2b8; }
+        .status-dot.grey { background: #9e9e9e; }
+        
+        @media print {
+            body { background: white; padding: 15px; }
+            .manual-container { box-shadow: none; padding: 20px; }
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .manual-container { padding: 20px; }
+            .toc ul { grid-template-columns: 1fr; }
+            .manual-meta { flex-direction: column; }
+            .step { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="manual-container">
+        
+        <!-- HEADER -->
+        <div class="manual-header">
+            <h1>Silver Sands HRMS</h1>
+            <div class="subtitle">Human Resource Management System — User Manual</div>
+            <div class="company">Silver Sands Salima</div>
+        </div>
+        
+        <!-- META INFO -->
+        <div class="manual-meta">
+            <div class="meta-item"><strong>Version:</strong> 2.0.0</div>
+            <div class="meta-item"><strong>Date:</strong> August 2026</div>
+            <div class="meta-item"><strong>For:</strong> All System Users</div>
+            <div class="meta-item"><strong>Status:</strong> <span class="badge badge-success">Active</span></div>
+        </div>
+        
+        <!-- TABLE OF CONTENTS -->
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#section-intro">1. Introduction</a></li>
+                <li><a href="#section-login">2. Login &amp; Access</a></li>
+                <li><a href="#section-dashboard">3. Dashboard</a></li>
+                <li><a href="#section-employees">4. Employee Management</a></li>
+                <li><a href="#section-attendance">5. Attendance Register</a></li>
+                <li><a href="#section-summary">6. Employee Summary</a></li>
+                <li><a href="#section-reports">7. Reports</a></li>
+                <li><a href="#section-signin">8. Sign-In Sheet</a></li>
+                <li><a href="#section-profile">9. My Profile</a></li>
+                <li><a href="#section-security">10. Security &amp; User Management</a></li>
+                <li><a href="#section-activity">11. Activity Logs</a></li>
+                <li><a href="#section-status">12. Attendance Status Guide</a></li>
+                <li><a href="#section-faq">13. Frequently Asked Questions</a></li>
+                <li><a href="#section-support">14. Support &amp; Help</a></li>
+            </ul>
+        </div>
+        
+        <!-- SECTION 1: INTRODUCTION -->
+        <div class="section" id="section-intro">
+            <h2>1. Introduction</h2>
+            
+            <p>The Silver Sands HRMS is a web-based system designed to help manage human resources efficiently. It allows users to track employee attendance, manage employee records, generate reports, and maintain a secure audit trail.</p>
+            
+            <div class="highlight-box">
+                <strong>Purpose of the System</strong>
+                <p style="margin-top:5px;">This system replaces manual attendance tracking and paper-based record keeping with a modern digital solution. It provides real-time visibility into employee attendance patterns and simplifies payroll preparation.</p>
+            </div>
+            
+            <h3>Who Can Use This System?</h3>
+            <ul>
+                <li><strong>HR Staff</strong> — Full access to manage employees and attendance</li>
+                <li><strong>Supervisors</strong> — Can manage their team's attendance and view reports</li>
+                <li><strong>Viewers</strong> — Read-only access to view employee data and reports</li>
+                <li><strong>System Administrators</strong> — Full system control and user management</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>Important Note</strong>
+                <p style="margin-top:5px;">All user actions are logged for audit purposes. The system automatically logs out inactive users after 10 minutes for security reasons.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 2: LOGIN -->
+        <div class="section" id="section-login">
+            <h2>2. Login &amp; Access</h2>
+            
+            <h3>How to Log In</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <strong>Open the System URL</strong>
+                    <p>Open your web browser and navigate to the HRMS URL provided by IT.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <strong>Enter Your Credentials</strong>
+                    <p>Enter your username and password in the login form. Your credentials are provided by HR or IT.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <strong>Click Login</strong>
+                    <p>Click the "Login" button. If successful, you will be redirected to the Dashboard.</p>
+                </div>
+            </div>
+            
+            <div class="warning-box">
+                <strong>Important Security Notice</strong>
+                <ul style="margin-top:5px;">
+                    <li>Do not share your password with anyone</li>
+                    <li>Log out when you finish using the system</li>
+                    <li>You cannot be logged in on multiple devices simultaneously</li>
+                    <li>If you forget your password, contact HR or IT for assistance</li>
+                </ul>
+            </div>
+            
+            <h3>Automatic Logout</h3>
+            <p>The system will automatically log you out after 10 minutes of inactivity. A warning banner will appear 60 seconds before logout, giving you the option to stay active.</p>
+            
+            <div class="info-box">
+                <strong>To stay active:</strong> Click the "Stay Active" button when the warning appears, or simply click anywhere on the page.
+            </div>
+        </div>
+        
+        <!-- SECTION 3: DASHBOARD -->
+        <div class="section" id="section-dashboard">
+            <h2>3. Dashboard</h2>
+            
+            <p>The Dashboard is your starting point when you log in. It provides a quick overview of attendance data for the current payroll period.</p>
+            
+            <h3>Dashboard Features</h3>
+            <ul>
+                <li><strong>Statistics Cards</strong> — Shows total Present (P), Absent (A), Sick (S), Leave (L), and Day Off (O) for all employees in the current period.</li>
+                <li><strong>Department Summary Table</strong> — Breaks down attendance by department with staff counts and totals.</li>
+                <li><strong>Quick Info</strong> — Shows total employees, active departments, period days, and the current payroll period.</li>
+                <li><strong>Quick Actions</strong> — The "Open Attendance Register" button takes you directly to the attendance page.</li>
+            </ul>
+            
+            <div class="highlight-box">
+                <strong>Tip</strong>
+                <p style="margin-top:5px;">Use the Dashboard to get a quick snapshot of attendance without navigating to other pages. The data updates automatically when you refresh.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 4: EMPLOYEE MANAGEMENT -->
+        <div class="section" id="section-employees">
+            <h2>4. Employee Management</h2>
+            
+            <p>The Employee Management page allows you to view, add, edit, and delete employee records. This is typically managed by HR staff and supervisors.</p>
+            
+            <h3>Viewing Employees</h3>
+            <ul>
+                <li>All employees are displayed in a table with columns for number, employee number, name, department, position, join date, and day off.</li>
+                <li>Use the <strong>Search</strong> box to find employees by name, employee number, or position.</li>
+                <li>Use the <strong>Department Filter</strong> to view employees in a specific department.</li>
+                <li>Use the <strong>Day Off Filter</strong> to find employees with a specific scheduled day off.</li>
+            </ul>
+            
+            <h3>Adding an Employee</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <strong>Click "Add Employee"</strong>
+                    <p>Click the "Add Employee" button at the top right of the page.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <strong>Fill in Employee Details</strong>
+                    <p>Enter the employee's full name, department, position, join date, and day off (if applicable).</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <strong>Save</strong>
+                    <p>Click "Save Employee" to add the employee to the system.</p>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong>Note on Employee Numbers</strong>
+                <p style="margin-top:5px;">Employee numbers are automatically generated by the system and cannot be manually changed.</p>
+            </div>
+            
+            <h3>Editing an Employee</h3>
+            <ul>
+                <li>Click the <strong>Edit</strong> button (pencil icon) next to the employee's name.</li>
+                <li>Update the required fields in the modal that appears.</li>
+                <li>Click "Save Employee" to apply changes.</li>
+            </ul>
+            
+            <h3>Deleting an Employee</h3>
+            <ul>
+                <li>Click the <strong>Delete</strong> button (trash icon) next to the employee's name.</li>
+                <li>Confirm the deletion when prompted.</li>
+                <li><strong>Important:</strong> This action cannot be undone and will also delete all attendance records for that employee.</li>
+            </ul>
+            
+            <div class="warning-box">
+                <strong>Important</strong>
+                <p style="margin-top:5px;">Only users with proper permissions (HR, Supervisors, IT) can add, edit, or delete employees. Viewers can only view employee information.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 5: ATTENDANCE REGISTER -->
+        <div class="section" id="section-attendance">
+            <h2>5. Attendance Register</h2>
+            
+            <p>The Attendance Register is the core feature of the HRMS. It allows you to track daily attendance for all employees.</p>
+            
+            <h3>Selecting a Period</h3>
+            <ul>
+                <li>Use the <strong>Payroll Period</strong> dropdown to select the period you want to view.</li>
+                <li>Periods run from the 27th of the previous month to the 26th of the selected month.</li>
+                <li>Click <strong>"New Period"</strong> to create a new payroll period.</li>
+                <li>Click <strong>"Mark Day Offs"</strong> to automatically mark scheduled day offs for employees.</li>
+            </ul>
+            
+            <h3>Marking Attendance</h3>
+            <ul>
+                <li>The attendance table shows employees grouped by department.</li>
+                <li>Each column represents a day in the period.</li>
+                <li>Click on any cell to change the attendance status.</li>
+                <li>Available statuses: <span class="badge badge-success">P</span> Present, <span class="badge badge-danger">A</span> Absent, <span class="badge badge-warning">S</span> Sick, <span class="badge badge-info">L</span> Leave, <span class="badge badge-secondary">O</span> Day Off</li>
+            </ul>
+            
+            <div class="highlight-box">
+                <strong>Auto-Save Feature</strong>
+                <p style="margin-top:5px;">Changes are automatically saved after 600ms (less than a second). You don't need to click a save button. Look for the "Auto-save: ON" indicator in the period selector.</p>
+            </div>
+            
+            <h3>Understanding the Table</h3>
+            <ul>
+                <li><strong>Department Rows</strong> — Gold/bold rows showing department names.</li>
+                <li><strong>Employee Rows</strong> — Each row shows an employee's attendance for all days.</li>
+                <li><strong>Total Columns</strong> — The last five columns show totals for P, A, S, L, and O.</li>
+                <li><strong>Subtotal Rows</strong> — Show department totals for the period.</li>
+                <li><strong>Today Highlight</strong> — Today's date column is highlighted in gold.</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>Tip</strong>
+                <p style="margin-top:5px;">If an employee has a scheduled day off, the system automatically marks "O" for those days. You can still override this if needed.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 6: EMPLOYEE SUMMARY -->
+        <div class="section" id="section-summary">
+            <h2>6. Employee Summary</h2>
+            
+            <p>The Employee Summary page provides a detailed breakdown of attendance totals (P, A, S, L, O) for each employee.</p>
+            
+            <h3>Views</h3>
+            <ul>
+                <li><strong>Pay Period View</strong> — Shows summary for a specific payroll period.</li>
+                <li><strong>Date Range View</strong> — Shows summary for a custom date range of your choice.</li>
+            </ul>
+            
+            <h3>Features</h3>
+            <ul>
+                <li><strong>Employee Filter</strong> — Select a specific employee to view their individual stats.</li>
+                <li><strong>Click to View</strong> — Click on any employee row to view their individual summary.</li>
+                <li><strong>Department Grouping</strong> — Employees are grouped by department with subtotals.</li>
+                <li><strong>Grand Totals</strong> — Overall totals for all employees.</li>
+                <li><strong>Export CSV</strong> — Download the summary data as a CSV file for use in Excel.</li>
+            </ul>
+            
+            <div class="highlight-box">
+                <strong>When to Use This Page</strong>
+                <p style="margin-top:5px;">Use this page to quickly see which employees have high absence rates, or to verify attendance totals before payroll processing.</p>
+            </div>
+            
+            <h3>Individual Employee View</h3>
+            <p>When you select a specific employee, you will see:</p>
+            <ul>
+                <li>Employee details (name, number, department, position, join date)</li>
+                <li>Large stat cards showing P, A, S, L, O totals</li>
+                <li>Total days worked</li>
+                <li>The period or date range being viewed</li>
+            </ul>
+        </div>
+        
+        <!-- SECTION 7: REPORTS -->
+        <div class="section" id="section-reports">
+            <h2>7. Reports</h2>
+            
+            <p>The Reports page allows you to generate professional Excel reports with color-coded attendance data.</p>
+            
+            <h3>Generating a Report</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <strong>Select a Period</strong>
+                    <p>Choose the payroll period you want to report on from the dropdown.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <strong>Click "Generate Report"</strong>
+                    <p>Click the gold button to generate the report.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <strong>Download the File</strong>
+                    <p>The Excel file will download automatically. It is password-protected for security.</p>
+                </div>
+            </div>
+            
+            <h3>Report Features</h3>
+            <ul>
+                <li><strong>Color-Coded Attendance</strong> — P (green), A (red), S (orange), L (blue), O (grey)</li>
+                <li><strong>Department Grouping</strong> — Departments are grouped with subtotals</li>
+                <li><strong>Employee Totals</strong> — Each row shows totals for P, A, S, L, O</li>
+                <li><strong>Grand Totals</strong> — Overall totals at the bottom of the report</li>
+                <li><strong>Password Protection</strong> — Report is read-only and requires a password to modify</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>Note</strong>
+                <p style="margin-top:5px;">Only HR staff and supervisors can generate reports. Viewers cannot access this feature.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 8: SIGN-IN SHEET -->
+        <div class="section" id="section-signin">
+            <h2>8. Sign-In Sheet</h2>
+            
+            <p>The Sign-In Sheet page generates a printable daily attendance register for employees to sign in and out.</p>
+            
+            <h3>Generating a Sign-In Sheet</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <strong>Select a Date</strong>
+                    <p>Choose the date for which you want to generate a sign-in sheet.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <strong>Click "Generate Sign-In Sheet"</strong>
+                    <p>The sign-in sheet will be displayed on the page.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <strong>Print the Sheet</strong>
+                    <p>Click the "Print" button to print the sign-in sheet. The print view is optimized for paper.</p>
+                </div>
+            </div>
+            
+            <h3>Sign-In Sheet Features</h3>
+            <ul>
+                <li><strong>Company Header</strong> — Silver Sands Salima logo and title</li>
+                <li><strong>Employee Listing</strong> — All employees grouped by department</li>
+                <li><strong>Time Tracking</strong> — Morning and afternoon time-in/time-out fields</li>
+                <li><strong>Signature Column</strong> — Space for employees to sign</li>
+                <li><strong>Instructions</strong> — Guidance on how to fill in the sheet</li>
+            </ul>
+            
+            <div class="highlight-box">
+                <strong>Tip</strong>
+                <p style="margin-top:5px;">The sign-in sheet is designed for daily use. Print it at the beginning of the day and have employees complete it as they arrive and leave.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 9: PROFILE -->
+        <div class="section" id="section-profile">
+            <h2>9. My Profile</h2>
+            
+            <p>The Profile page allows you to view and update your personal information.</p>
+            
+            <h3>Viewing Your Profile</h3>
+            <ul>
+                <li>Your full name, username, role, and department are displayed.</li>
+                <li>Your session status is shown (Active).</li>
+                <li>Your avatar shows the first letter of your name.</li>
+            </ul>
+            
+            <h3>Editing Your Profile</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <strong>Click "Edit Profile"</strong>
+                    <p>This opens the profile edit modal.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <strong>Update Your Details</strong>
+                    <p>You can change your username and full name.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <strong>Change Password (Optional)</strong>
+                    <p>Enter your current password and a new password (minimum 4 characters) if you want to change it.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <strong>Save Changes</strong>
+                    <p>Click "Save Changes" to update your profile.</p>
+                </div>
+            </div>
+            
+            <div class="warning-box">
+                <strong>Important</strong>
+                <p style="margin-top:5px;">To change your password, you must provide your current password. This is a security measure to prevent unauthorized changes.</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 10: SECURITY & USER MANAGEMENT -->
+        <div class="section" id="section-security">
+            <h2>10. Security &amp; User Management</h2>
+            
+            <p>The User Management page allows authorized users to manage system accounts.</p>
+            
+            <h3>User Roles</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Description</th>
+                        <th>Access Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-danger">IT Specialist</span></td>
+                        <td>Full system access, can manage users and view all activity logs</td>
+                        <td>Highest</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-primary">System Admin</span></td>
+                        <td>Can manage employees and attendance</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-warning">Supervisor</span></td>
+                        <td>Can manage employees, attendance, and create user accounts</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">Viewer</span></td>
+                        <td>Read-only access to view data</td>
+                        <td>Low</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Creating a New User</h3>
+            <ul>
+                <li>Click the <strong>"Create Account"</strong> button (visible to authorized users only).</li>
+                <li>Fill in username, full name, password, role, and department.</li>
+                <li>Click "Create Account" to add the new user.</li>
+            </ul>
+            
+            <h3>Editing a User</h3>
+            <ul>
+                <li>Click the <strong>Edit</strong> button next to the user (visible to IT Specialists only).</li>
+                <li>Update name, role, or department.</li>
+                <li>Click "Save User" to apply changes.</li>
+            </ul>
+            
+            <h3>Deleting a User</h3>
+            <ul>
+                <li>Click the <strong>Delete</strong> button next to the user (visible to IT Specialists only).</li>
+                <li>Confirm the deletion.</li>
+                <li><strong>Important:</strong> The developer account cannot be deleted.</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>Note</strong>
+                <p style="margin-top:5px;">The User Management page is only visible to users with appropriate permissions (IT Specialist, System Admin, Supervisor).</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 11: ACTIVITY LOGS -->
+        <div class="section" id="section-activity">
+            <h2>11. Activity Logs</h2>
+            
+            <p>The Activity Logs page shows a complete audit trail of all user actions in the system.</p>
+            
+            <h3>What is Logged?</h3>
+            <ul>
+                <li><strong>Login</strong> — When users log in to the system</li>
+                <li><strong>Employee Actions</strong> — Adding, editing, or deleting employees</li>
+                <li><strong>Attendance Changes</strong> — Any changes made to attendance records</li>
+                <li><strong>Report Generation</strong> — When reports are downloaded</li>
+                <li><strong>User Management</strong> — Creating, editing, or deleting user accounts</li>
+                <li><strong>Profile Updates</strong> — When users update their profiles</li>
+            </ul>
+            
+            <h3>Filtering Logs</h3>
+            <ul>
+                <li><strong>Action Filter</strong> — Filter by specific action type (e.g., LOGIN, EMPLOYEE_ADD)</li>
+                <li><strong>User Filter</strong> — Filter by specific username</li>
+                <li><strong>Date Range</strong> — Filter by date range</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>Note</strong>
+                <p style="margin-top:5px;">IT Specialists can see all user activities. Other users can only see their own activities. This is for privacy and security reasons.</p>
+            </div>
+            
+            <h3>Clearing Logs</h3>
+            <p>Users with IT Specialist permissions can clear logs. This is typically done when logs are very old and need to be archived. Be careful with this feature as it removes audit trail data.</p>
+        </div>
+        
+        <!-- SECTION 12: ATTENDANCE STATUS GUIDE -->
+        <div class="section" id="section-status">
+            <h2>12. Attendance Status Guide</h2>
+            
+            <p>This guide explains the five attendance statuses used in the system.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Description</th>
+                        <th>Color</th>
+                        <th>When to Use</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-success">P</span></td>
+                        <td>Present</td>
+                        <td>Green</td>
+                        <td>Employee reported to work on time</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-danger">A</span></td>
+                        <td>Absent</td>
+                        <td>Red</td>
+                        <td>Employee was absent without prior approval</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-warning">S</span></td>
+                        <td>Sick</td>
+                        <td>Orange</td>
+                        <td>Employee was absent due to illness (with valid sick note)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">L</span></td>
+                        <td>Leave</td>
+                        <td>Blue</td>
+                        <td>Employee was on approved annual or other leave</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-secondary">O</span></td>
+                        <td>Day Off</td>
+                        <td>Grey</td>
+                        <td>Employee's scheduled rest day (auto-marked by system)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="highlight-box">
+                <strong>Important Notes</strong>
+                <ul style="margin-top:5px;">
+                    <li>The system automatically marks "O" for employees with scheduled day offs</li>
+                    <li>Only Present (P) and Day Off (O) are considered "good" attendance</li>
+                    <li>Absent (A), Sick (S), and Leave (L) may affect payroll calculations</li>
+                    <li>HR staff can override any auto-marked status if needed</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- SECTION 13: FAQ -->
+        <div class="section" id="section-faq">
+            <h2>13. Frequently Asked Questions</h2>
+            
+            <h3>How do I change my password?</h3>
+            <p>Go to your Profile page, click "Edit Profile", enter your current password and a new password (minimum 4 characters), then click "Save Changes".</p>
+            
+            <h3>Why can't I edit attendance?</h3>
+            <p>Your user role may not have permission to edit attendance. Only HR staff, Supervisors, and IT Specialists can edit attendance. Viewers have read-only access.</p>
+            
+            <h3>What happens when I'm logged in on another device?</h3>
+            <p>The system prevents multiple device login for security reasons. If you log in on a new device, your previous session will be terminated. You will need to log in again on the first device.</p>
+            
+            <h3>How long does the system keep me logged in?</h3>
+            <p>The system will log you out automatically after 10 minutes of inactivity. You will receive a warning 60 seconds before logout.</p>
+            
+            <h3>Why can't I see the Employee Summary?</h3>
+            <p>All users can see the Employee Summary page. If you're having trouble, check that you've selected a valid period or date range.</p>
+            
+            <h3>How do I export data?</h3>
+            <p>On the Employee Summary page, click the "Export CSV" button. On the Reports page, click "Generate Report" to download an Excel file. Both options export the data you're currently viewing.</p>
+            
+            <h3>Can I recover a deleted employee?</h3>
+            <p>No, deleting an employee is permanent and removes all their attendance records. Be very careful when deleting employees.</p>
+            
+            <h3>What is the payroll period format?</h3>
+            <p>Payroll periods run from the 27th of the previous month to the 26th of the selected month. For example, period "2026-08" covers 27 July 2026 to 26 August 2026.</p>
+        </div>
+        
+        <!-- SECTION 14: SUPPORT -->
+        <div class="section" id="section-support">
+            <h2>14. Support &amp; Help</h2>
+            
+            <div class="highlight-box">
+                <strong>Need Help?</strong>
+                <ul style="margin-top:5px;">
+                    <li><strong>HR Department:</strong> For employee data and attendance questions</li>
+                    <li><strong>IT Department:</strong> For technical issues, password resets, and system access</li>
+                    <li><strong>Training:</strong> Ask your supervisor or HR for additional training if needed</li>
+                </ul>
+            </div>
+            
+            <h3>Getting Started Tips</h3>
+            <ul>
+                <li><strong>New Users:</strong> Start with the Dashboard to get familiar with the system</li>
+                <li><strong>Regular Users:</strong> Use the Attendance Register daily to track attendance</li>
+                <li><strong>Supervisors:</strong> Review the Employee Summary regularly to monitor your team</li>
+                <li><strong>HR Staff:</strong> Generate reports at the end of each payroll period</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>Pro Tip</strong>
+                <p style="margin-top:5px;">Bookmark the HRMS login page in your browser for quick access. The system works best in modern browsers like Google Chrome, Firefox, or Microsoft Edge.</p>
+            </div>
+        </div>
+        
+        <!-- FOOTER -->
+        <div style="border-top: 2px solid #c9a84c; margin-top: 40px; padding-top: 20px; text-align: center; color: #6a7a8a; font-size: 13px;">
+            <p>Silver Sands HRMS — User Manual</p>
+            <p style="margin-top: 4px;">Silver Sands Salima</p>
+            <p style="margin-top: 4px; font-size: 11px;">This manual is for authorized users of the Silver Sands HRMS system.</p>
+        </div>
+        
+    </div>
+</body>
+</html>

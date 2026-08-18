@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Silver Sands Human Resource Management System</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/android-chrome-512x512.png">
+  <link rel="shortcut icon" href="/assets/favicon.ico">
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="/assets/logo.png" alt="Logo" style="height:45px; width:auto;"/>
+            <span style="font-size:16px; font-weight:600; color:#1a2a4a; margin-left:10px;">Silver Sands</span>
+        </div>
+
+        <ul class="menu">
+            <li><a href="#" onclick="navigate('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+
+            <li>
+                <a href="#"><i class="fas fa-users-cog"></i> HR Management</a>
+                <div class="mega">
+                    <div class="left">
+                        <a href="#" onclick="navigate('employees')"><i class="fas fa-users"></i> Employees</a>
+                        <a href="#" onclick="navigate('attendance')"><i class="fas fa-calendar-alt"></i> Attendance</a>
+                        <!-- <a href="#" onclick="navigate('summary')"><i class="fas fa-chart-bar"></i> Employee Summary</a> -->
+                        <a href="#" onclick="navigate('reports')"><i class="fas fa-file-alt"></i> Reports</a>
+                        <a href="#" onclick="navigate('signin')"><i class="fas fa-clipboard-list"></i> Sign-In Sheet</a>
+                    </div>
+                    <div class="right">
+                        <h3><i class="fas fa-users-cog"></i> HR Management</h3>
+                        <p>Manage employees, track attendance, generate reports, and create sign-in sheets.</p>
+                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                            <span style="background:#e8ecf0; padding:4px 14px; border-radius:12px; font-size:11px;" id="mega-emp-count">Loading...</span>
+                            <span style="background:#e8ecf0; padding:4px 14px; border-radius:12px; font-size:11px;" id="mega-dept-count">Loading...</span>
+                            <span style="background:#e8ecf0; padding:4px 14px; border-radius:12px; font-size:11px;">Auto-Numbering</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="#"><i class="fas fa-shield-alt"></i> Security</a>
+                <div class="mega">
+                    <div class="left">
+                        <a href="#" onclick="navigate('activitylogs')"><i class="fas fa-history"></i> Activity Logs</a>
+                        <a href="#" onclick="navigate('security')"><i class="fas fa-user-lock"></i> User Management</a>
+                        <a href="#" onclick="navigate('profile')"><i class="fas fa-id-card"></i> Profile</a>
+                    </div>
+                    <div class="right">
+                        <h3><i class="fas fa-shield-alt"></i> Security</h3>
+                        <p>Monitor system activity, manage users, and control access permissions.</p>
+                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                            <span style="background:#28a745; color:#fff; padding:4px 14px; border-radius:12px; font-size:11px;">Active Session</span>
+                            <span style="background:#dc3545; color:#fff; padding:4px 14px; border-radius:12px; font-size:11px;">Auto-Logout: 10 min</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="#" onclick="navigate('reports')"><i class="fas fa-file-export"></i> Reports</a>
+                <div class="mega">
+                    <div class="left">
+                        <a href="#" onclick="navigate('reports')"><i class="fas fa-file-excel"></i> Attendance Report</a>
+                        <!-- <a href="#" onclick="navigate('summary')"><i class="fas fa-chart-bar"></i> Employee Summary</a> -->
+                        <a href="#"><i class="fas fa-file-pdf"></i> Employee Report</a>
+                    </div>
+                    <div class="right">
+                        <h3><i class="fas fa-file-export"></i> Reports</h3>
+                        <p>Generate professional Excel reports with color-coded attendance data.</p>
+                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                            <span style="background:#1a2a4a; color:#fff; padding:4px 14px; border-radius:12px; font-size:11px;">Excel Export</span>
+                            <span style="background:#c9a84c; color:#fff; padding:4px 14px; border-radius:12px; font-size:11px;">Protected Files</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="#"><i class="fas fa-bolt"></i> Quick Actions</a>
+                <div class="mega" style="width:500px;">
+                    <div class="left">
+                        <a href="#" onclick="openAddEmployee()"><i class="fas fa-user-plus"></i> Add Employee</a>
+                        <a href="#" onclick="openNewPeriod()"><i class="fas fa-calendar-plus"></i> New Period</a>
+                        <a href="#" onclick="navigate('signin')"><i class="fas fa-print"></i> Print Sign-In Sheet</a>
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                    <div class="right">
+                        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                        <p>Perform common tasks quickly without navigating through menus.</p>
+                        <div style="margin-top:12px; padding:10px; background:#f8f9fa; border-radius:8px; font-size:12px; color:#6a7a8a;">
+                            <i class="fas fa-clock"></i> Session: <span id="session-timer">10:00</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+
+            <li class="user-profile" style="margin-left:10px;">
+                <a href="#" style="display:flex; align-items:center; gap:8px; padding:6px 12px; background:#f8f9fa; border-radius:30px;">
+                    <span class="user-avatar" id="header-avatar" style="width:32px; height:32px; background:#c9a84c; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px;">T</span>
+                    <span id="header-username" style="font-size:13px; font-weight:500;">User</span>
+                    <i class="fas fa-chevron-down" style="font-size:10px; color:#6a7a8a;"></i>
+                </a>
+                <div class="mega" style="width:280px; right:0; left:auto;">
+                    <div class="left" style="border-right:none; width:100%;">
+                        <a href="#" onclick="navigate('profile')" style="border-bottom:1px solid #eee;">
+                            <i class="fas fa-user"></i> <span id="profile-name">Loading...</span>
+                        </a>
+                        <a href="#" style="pointer-events:none; color:#6a7a8a; font-size:12px; border-bottom:1px solid #eee;">
+                            <i class="fas fa-briefcase"></i> <span id="profile-role">Loading...</span>
+                        </a>
+                        <a href="#" style="pointer-events:none; color:#6a7a8a; font-size:12px; border-bottom:1px solid #eee;">
+                            <i class="fas fa-building"></i> <span id="profile-dept">Loading...</span>
+                        </a>
+                        <a href="#" onclick="toggleDarkMode()" style="border-bottom:1px solid #eee;">
+                            <i class="fas fa-moon" id="profile-dark-icon"></i> <span id="profile-dark-text">Dark Mode</span>
+                        </a>
+                        <a href="#" onclick="logout()" style="color:#dc3545; font-weight:600;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <div class="search" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <i class="fas fa-moon" id="header-dark-icon"></i>
+        </div>
+    </div>
+</header>
+
+<div class="main-wrapper">
+
+    <div class="page-content">
+
+        <div class="page-section active" id="page-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card present">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-value" id="dash-present">0</div>
+                    <div class="stat-label">Present Days</div>
+                </div>
+                <div class="stat-card absent">
+                    <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-value" id="dash-absent">0</div>
+                    <div class="stat-label">Absent Days</div>
+                </div>
+                <div class="stat-card sick">
+                    <div class="stat-icon"><i class="fas fa-thermometer-half"></i></div>
+                    <div class="stat-value" id="dash-sick">0</div>
+                    <div class="stat-label">Sick Days</div>
+                </div>
+                <div class="stat-card leave">
+                    <div class="stat-icon"><i class="fas fa-umbrella-beach"></i></div>
+                    <div class="stat-value" id="dash-leave">0</div>
+                    <div class="stat-label">Leave Days</div>
+                </div>
+                <div class="stat-card off">
+                    <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="stat-value" id="dash-off">0</div>
+                    <div class="stat-label">Day Offs</div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Department Summary</h3>
+                        <span style="font-size:11px;color:var(--gray-400);">Current Period</span>
+                    </div>
+                    <div class="card-body" style="padding:0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th style="text-align:center">Staff</th>
+                                    <th style="text-align:center">P</th>
+                                    <th style="text-align:center">A</th>
+                                    <th style="text-align:center">S</th>
+                                    <th style="text-align:center">L</th>
+                                    <th style="text-align:center">O</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dept-summary-body">
+                                <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400);">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Quick Info</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display:flex;flex-direction:column;gap:14px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--gray-100);border-radius:8px;">
+                                <span style="font-size:13px;color:var(--gray-600);">Total Employees</span>
+                                <strong id="qi-total-emp" style="color:var(--navy);font-size:18px;">0</strong>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--gray-100);border-radius:8px;">
+                                <span style="font-size:13px;color:var(--gray-600);">Departments Active</span>
+                                <strong id="qi-depts" style="color:var(--navy);font-size:18px;">0</strong>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--gray-100);border-radius:8px;">
+                                <span style="font-size:13px;color:var(--gray-600);">Period Days</span>
+                                <strong id="qi-days" style="color:var(--navy);font-size:18px;">0</strong>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--gold-pale);border-radius:8px;border:1px solid var(--gold);">
+                                <span style="font-size:13px;color:var(--navy);font-weight:600;">Current Period</span>
+                                <strong id="qi-period" style="color:var(--gold);font-size:13px;">-</strong>
+                            </div>
+                            <button class="btn btn-gold" onclick="navigate('attendance')" style="width:100%;justify-content:center;">
+                                <i class="fas fa-calendar-check"></i> Open Attendance Register
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-section" id="page-attendance">
+            <div class="period-selector">
+                <label><i class="fas fa-calendar-alt"></i> Payroll Period:</label>
+                <select class="form-control" id="att-period-select" onchange="loadAttendance()" style="width:auto;padding:7px 12px;">
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="openNewPeriod()"><i class="fas fa-plus"></i> New Period</button>
+                <button class="btn btn-success btn-sm" onclick="markDayOffs()" title="Auto-mark scheduled day offs"><i class="fas fa-calendar-day"></i> Mark Day Offs</button>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:12px;color:var(--gray-600);">Auto-save: ON</span>
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;"></span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <strong style="font-size:11px;color:var(--navy);letter-spacing:0.5px;text-transform:uppercase;">Legend:</strong>
+                <div class="legend-item"><div class="legend-dot P">P</div> Present</div>
+                <div class="legend-item"><div class="legend-dot A">A</div> Absent</div>
+                <div class="legend-item"><div class="legend-dot S">S</div> Sick</div>
+                <div class="legend-item"><div class="legend-dot L">L</div> Leave</div>
+                <div class="legend-item"><div class="legend-dot O">O</div> Day Off</div>
+                <div style="margin-left:auto;font-size:12px;color:var(--gray-400);">Click any cell to mark attendance &bull; Changes auto-save</div>
+            </div>
+
+            <div class="card" style="overflow:hidden;">
+                <div class="att-table-wrap" id="att-table-container">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-table"></i></div>
+                        <h3>Select a Period</h3>
+                        <p>Choose a payroll period above to view attendance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-section" id="page-employees">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                        <input type="text" placeholder="Search employees..." id="emp-search" oninput="filterEmployees()"/>
+                    </div>
+                    <select class="form-control" id="emp-dept-filter" onchange="filterEmployees()" style="padding:8px 12px;width:auto;">
+                        <option value="">All Departments</option>
+                        <option>Admin & Accounts</option>
+                        <option>Front Office</option>
+                        <option>Food & Beverage</option>
+                        <option>Housekeeping & Laundry</option>
+                        <option>Maintenance</option>
+                        <option>Attachment</option>
+                        <option>Security</option>
+                    </select>
+                    <select class="form-control" id="emp-dayoff-filter" onchange="filterEmployees()" style="padding:8px 12px;width:auto;">
+                        <option value="">All Day Off</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                        <option value="None">None</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <span id="emp-count" style="font-size:13px;color:var(--gray-400);"></span>
+                    <button class="btn btn-primary" onclick="openAddEmployee()" id="add-employee-btn"><i class="fas fa-user-plus"></i> Add Employee</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="table-wrap">
+                    <table id="emp-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Emp No.</th>
+                                <th>Full Name</th>
+                                <th>Department</th>
+                                <th>Position</th>
+                                <th>Join Date</th>
+                                <th>Day Off</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emp-table-body">
+                            <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-400);">Loading employees...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+<div class="page-section" id="page-summary">
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <input type="radio" name="summary-view" value="period" id="view-period" checked onchange="loadSummaryData()">
+                    <label for="view-period" style="font-size:12px;cursor:pointer;">Pay Period</label>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <input type="radio" name="summary-view" value="range" id="view-range" onchange="loadSummaryData()">
+                    <label for="view-range" style="font-size:12px;cursor:pointer;">Date Range</label>
+                </div>
+                <select class="form-control" id="summary-period-select" onchange="loadSummaryData()" style="width:auto;padding:6px 10px;font-size:12px;">
+                </select>
+                <div id="range-controls" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <input type="date" class="form-control" id="summary-start-date" style="width:auto;padding:6px 10px;font-size:12px;">
+                    <span style="font-size:12px;">to</span>
+                    <input type="date" class="form-control" id="summary-end-date" style="width:auto;padding:6px 10px;font-size:12px;">
+                    <button class="btn btn-primary btn-sm" onclick="loadSummaryData()"><i class="fas fa-search"></i> Go</button>
+                </div>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <span id="summary-record-count" style="font-size:12px;color:var(--gray-400);"></span>
+            <button class="btn btn-success btn-sm" onclick="exportSummaryCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+        </div>
+    </div>
+
+    <div style="margin-bottom:16px;padding:12px 16px;background:var(--gray-100);border-radius:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <label style="font-size:13px;font-weight:600;color:var(--gray-700);"><i class="fas fa-user"></i> Select Employee:</label>
+        <select class="form-control" id="summary-employee-select" onchange="loadSummaryData()" style="width:auto;min-width:250px;padding:6px 10px;font-size:12px;">
+            <option value="all">All Employees</option>
+        </select>
+        <span style="font-size:11px;color:var(--gray-500);"><i class="fas fa-info-circle"></i> Click on any employee row to view their stats</span>
+    </div>
+
+    <div id="summary-stats" style="margin-bottom:16px;"></div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Employee P-S-A-L-O Summary</h3>
+            <span style="font-size:11px;color:var(--gray-400);">P=Present · A=Absent · S=Sick · L=Leave · O=Day Off</span>
+        </div>
+        <div class="card-body" style="padding:0;">
+            <div id="summary-table-container" style="padding:20px;overflow-x:auto;">
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+                    <h3>Loading summary data...</h3>
+                    <p>Please wait while data is being loaded</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="page-section" id="page-reports">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Generate Report</h3>
+                    </div>
+                    <div class="card-body">
+                        <p style="font-size:13px;color:var(--gray-600);margin-bottom:18px;">Generate a read-only, protected Excel report of the attendance register for any payroll period.</p>
+                        <div class="form-group" style="margin-bottom:16px;">
+                            <label>Select Period</label>
+                            <select class="form-control" id="report-period-select">
+                            </select>
+                        </div>
+                        <div style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:8px;padding:12px 14px;margin-bottom:18px;">
+                            <p style="font-size:12px;color:var(--navy);"><strong>Note:</strong> The exported Excel report will be password-protected and read-only. It includes color-coded attendance, department groupings, and totals per employee.</p>
+                        </div>
+                        <button class="btn btn-gold" onclick="generateReport()" style="width:100%;justify-content:center;padding:12px;">
+                            <i class="fas fa-file-excel"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Period Statistics</h3>
+                    </div>
+                    <div class="card-body" id="report-stats">
+                        <div class="empty-state" style="padding:24px 0;">
+                            <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+                            <p>Select a period to view statistics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <div class="card-header">
+                    <h3>Attendance Color Guide</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
+                        <div style="text-align:center;padding:16px;background:var(--success-light);border-radius:8px;border:1.5px solid var(--success);">
+                            <div style="font-size:24px;font-weight:800;color:var(--success);">P</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--success);margin-top:4px;">PRESENT</div>
+                            <div style="font-size:11px;color:var(--gray-600);margin-top:4px;">Employee reported to work</div>
+                        </div>
+                        <div style="text-align:center;padding:16px;background:var(--danger-light);border-radius:8px;border:1.5px solid var(--danger);">
+                            <div style="font-size:24px;font-weight:800;color:var(--danger);">A</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--danger);margin-top:4px;">ABSENT</div>
+                            <div style="font-size:11px;color:var(--gray-600);margin-top:4px;">Unexcused absence</div>
+                        </div>
+                        <div style="text-align:center;padding:16px;background:var(--sick-light);border-radius:8px;border:1.5px solid var(--sick);">
+                            <div style="font-size:24px;font-weight:800;color:var(--sick);">S</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--sick);margin-top:4px;">SICK</div>
+                            <div style="font-size:11px;color:var(--gray-600);margin-top:4px;">Medical / Sick leave</div>
+                        </div>
+                        <div style="text-align:center;padding:16px;background:var(--warning-light);border-radius:8px;border:1.5px solid var(--warning);">
+                            <div style="font-size:24px;font-weight:800;color:var(--warning);">L</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--warning);margin-top:4px;">LEAVE</div>
+                            <div style="font-size:11px;color:var(--gray-600);margin-top:4px;">Annual / approved leave</div>
+                        </div>
+                        <div style="text-align:center;padding:16px;background:var(--off-light);border-radius:8px;border:1.5px solid var(--off);">
+                            <div style="font-size:24px;font-weight:800;color:var(--off);">O</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--off);margin-top:4px;">DAY OFF</div>
+                            <div style="font-size:11px;color:var(--gray-600);margin-top:4px;">Scheduled rest day</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-section" id="page-signin">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="date-selector">
+                        <label style="margin-right:10px; font-weight:600;"><i class="fas fa-calendar-day"></i> Select Date:</label>
+                        <input type="date" id="signin-date-picker" class="form-control" style="width:auto;display:inline-block;">
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-primary" onclick="generateSignInSheet()">
+                        <i class="fas fa-file-alt"></i> Generate Sign-In Sheet
+                    </button>
+                    <button class="btn btn-outline" onclick="printSignInSheet()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Daily Attendance Sign-In Register</h3>
+                    <span id="signin-date" style="font-size:12px;color:var(--gray-600);"></span>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div id="signin-sheet-container" style="overflow-x:auto; padding:20px; background:#fff;">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-file-signature"></i></div>
+                            <h3>Select Date & Generate Sheet</h3>
+                            <p>Choose a date and click "Generate Sign-In Sheet"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-section" id="page-security">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-lock"></i> User Management</h3>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span style="font-size:11px;color:var(--gray-400);">Manage system users and roles</span>
+                        <button class="btn btn-success btn-sm" id="create-account-btn" onclick="openCreateAccount()" style="display:none;">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div id="users-container" style="padding:20px;overflow-x:auto;">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-users"></i></div>
+                            <h3>Loading Users...</h3>
+                            <p>Please wait while users are being loaded</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-section" id="page-activitylogs">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-history"></i> Activity Logs</h3>
+                    <span style="font-size:11px;color:var(--gray-400);">Audit trail of all user actions</span>
+                </div>
+                <div class="card-body" style="padding:0;">
+
+                    <div class="logs-filters" style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 20px;background:var(--gray-100);border-bottom:1px solid var(--gray-200);align-items:flex-end;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-600);"><i class="fas fa-tag"></i> Action</label>
+                            <select class="form-control" id="filter-action" style="padding:6px 10px;font-size:12px;min-width:120px;">
+                                <option value="">All Actions</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-600);"><i class="fas fa-user"></i> User</label>
+                            <select class="form-control" id="filter-user" style="padding:6px 10px;font-size:12px;min-width:120px;">
+                                <option value="">All Users</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-600);"><i class="fas fa-calendar-alt"></i> Date From</label>
+                            <input type="date" class="form-control" id="filter-date-from" style="padding:6px 10px;font-size:12px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-600);"><i class="fas fa-calendar-alt"></i> Date To</label>
+                            <input type="date" class="form-control" id="filter-date-to" style="padding:6px 10px;font-size:12px;">
+                        </div>
+                        <div class="form-group" style="display:flex; gap:8px;margin-bottom:0;">
+                            <button class="btn btn-primary btn-sm" id="apply-filters"><i class="fas fa-filter"></i> Apply</button>
+                            <button class="btn btn-outline btn-sm" id="clear-filters"><i class="fas fa-undo"></i> Clear</button>
+                            <button class="btn btn-outline btn-sm" id="refresh-logs"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--gray-200);flex-wrap:wrap;gap:10px;">
+                        <span class="log-count" id="log-count" style="font-size:13px;color:var(--gray-600);">Total: 0 logs</span>
+                        <button class="btn btn-danger btn-sm" id="clear-all-logs"><i class="fas fa-trash-alt"></i> Clear All Logs</button>
+                    </div>
+
+                    <div id="logs-container" style="padding:20px;overflow-x:auto;">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-clipboard-list"></i></div>
+                            <h3>Loading Activity Logs...</h3>
+                            <p>Please wait while logs are being loaded</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;justify-content:center;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid var(--gray-200);">
+                        <button class="btn btn-outline btn-sm" id="prev-page"><i class="fas fa-chevron-left"></i> Previous</button>
+                        <span id="page-info" style="font-size:13px;color:var(--gray-600);">Page 1 of 1</span>
+                        <button class="btn btn-outline btn-sm" id="next-page">Next <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-section" id="page-profile">
+            <div class="card" style="max-width:600px;margin:0 auto;">
+                <div class="card-header">
+                    <h3><i class="fas fa-id-card"></i> My Profile</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display:flex;flex-direction:column;gap:20px;align-items:center;padding:20px 0;">
+                        <div style="width:120px;height:120px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;color:var(--navy-dark);" id="profile-avatar">
+                            T
+                        </div>
+                        <div style="text-align:center;width:100%;">
+                            <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-200);">
+                                <span style="font-weight:600;color:var(--gray-600);">Full Name</span>
+                                <span id="profile-full-name">Loading...</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-200);">
+                                <span style="font-weight:600;color:var(--gray-600);">Username</span>
+                                <span id="profile-username">Loading...</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-200);">
+                                <span style="font-weight:600;color:var(--gray-600);">Role</span>
+                                <span id="profile-user-role">Loading...</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-200);">
+                                <span style="font-weight:600;color:var(--gray-600);">Department</span>
+                                <span id="profile-user-dept">Loading...</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:10px 0;">
+                                <span style="font-weight:600;color:var(--gray-600);">Session</span>
+                                <span id="profile-session" style="color:var(--success);">Active</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;width:100%;">
+                            <button class="btn btn-primary" onclick="openProfileEdit()" style="flex:1;justify-content:center;">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                            <button class="btn btn-danger" onclick="logout()" style="flex:1;justify-content:center;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal-overlay" id="emp-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="emp-modal-title">Add Employee</h3>
+            <button class="btn-close" onclick="closeModal('emp-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="emp-id"/>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Employee Number</label>
+                    <input type="text" class="form-control" id="emp-no" placeholder="e.g. EMP001"/>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" id="emp-name" placeholder="Full name"/>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <select class="form-control" id="emp-dept">
+                        <option value="">Select Department</option>
+                        <option>Admin & Accounts</option>
+                        <option>Front Office</option>
+                        <option>Food & Beverage</option>
+                        <option>Housekeeping & Laundry</option>
+                        <option>Maintenance</option>
+                        <option>Attachment</option>
+                        <option>Security</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" class="form-control" id="emp-position" placeholder="e.g. Front Desk Officer"/>
+                </div>
+                <div class="form-group">
+                    <label>Date Joined</label>
+                    <input type="date" class="form-control" id="emp-join"/>
+                </div>
+                <div class="form-group">
+                    <label>Day Off</label>
+                    <select class="form-control" id="emp-dayoff">
+                        <option value="">None</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('emp-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEmployee()"><i class="fas fa-save"></i> Save Employee</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="del-modal">
+    <div class="modal" style="width:400px;">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <button class="btn-close" onclick="closeModal('del-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:14px;color:var(--gray-600);">Are you sure you want to remove <strong id="del-emp-name"></strong> from the system? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('del-modal')">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmDelete()"><i class="fas fa-trash-alt"></i> Delete Employee</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="period-modal">
+    <div class="modal" style="width:400px;">
+        <div class="modal-header">
+            <h3>Create New Payroll Period</h3>
+            <button class="btn-close" onclick="closeModal('period-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">The payroll period runs from the 27th of the previous month to the 26th of the selected month.</p>
+            <div class="form-group">
+                <label>Month & Year (the "to" month)</label>
+                <input type="month" class="form-control" id="new-period-input"/>
+            </div>
+            <div id="period-preview" style="margin-top:12px;padding:10px 14px;background:var(--gold-pale);border-radius:8px;font-size:13px;color:var(--navy);display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('period-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="createPeriod()"><i class="fas fa-plus"></i> Create Period</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="user-modal">
+    <div class="modal" style="width:450px;">
+        <div class="modal-header">
+            <h3>Edit User</h3>
+            <button class="btn-close" onclick="closeModal('user-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-user-id"/>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label>Username</label>
+                <input type="text" class="form-control" id="edit-username" disabled style="background:var(--gray-100);"/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label>Full Name</label>
+                <input type="text" class="form-control" id="edit-name" placeholder="Full name"/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label>Role *</label>
+                <select class="form-control" id="edit-role">
+                    <option value="System Admin">System Admin</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Viewer">Viewer</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <select class="form-control" id="edit-department">
+                    <option value="">None</option>
+                    <option value="Admin & Accounts">Admin & Accounts</option>
+                    <option value="Front Office">Front Office</option>
+                    <option value="Food & Beverage">Food & Beverage</option>
+                    <option value="Housekeeping & Laundry">Housekeeping & Laundry</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Attachment">Attachment</option>
+                    <option value="Security">Security</option>
+                    <option value="Management">Management</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('user-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveUser()"><i class="fas fa-save"></i> Save User</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="create-account-modal">
+    <div class="modal" style="width:450px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-plus"></i> Create New Account</h3>
+            <button class="btn-close" onclick="closeModal('create-account-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-user"></i> Username</label>
+                <input type="text" class="form-control" id="create-account-username" placeholder="Enter username" required/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-id-card"></i> Full Name</label>
+                <input type="text" class="form-control" id="create-account-name" placeholder="Enter full name" required/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" class="form-control" id="create-account-password" placeholder="Enter password (min 4 characters)" required/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-lock"></i> Confirm Password</label>
+                <input type="password" class="form-control" id="create-account-confirm-password" placeholder="Confirm password" required/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-briefcase"></i> Role</label>
+                <select class="form-control" id="create-account-role">
+                    <option value="System Admin">System Admin</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Viewer">Viewer</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-building"></i> Department</label>
+                <select class="form-control" id="create-account-department">
+                    <option value="">None</option>
+                    <option value="Admin & Accounts">Admin & Accounts</option>
+                    <option value="Front Office">Front Office</option>
+                    <option value="Food & Beverage">Food & Beverage</option>
+                    <option value="Housekeeping & Laundry">Housekeeping & Laundry</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Attachment">Attachment</option>
+                    <option value="Security">Security</option>
+                    <option value="Management">Management</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('create-account-modal')"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn btn-success" onclick="createAccount()"><i class="fas fa-save"></i> Create Account</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="profile-edit-modal">
+    <div class="modal" style="width:450px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-edit"></i> Edit Profile</h3>
+            <button class="btn-close" onclick="closeModal('profile-edit-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-user"></i> Username</label>
+                <input type="text" class="form-control" id="edit-profile-username" placeholder="Username"/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-id-card"></i> Full Name</label>
+                <input type="text" class="form-control" id="edit-profile-name" placeholder="Full name"/>
+            </div>
+            <hr style="margin:16px 0; border-color: var(--gray-200);"/>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-lock"></i> Current Password <span style="font-size:11px;color:var(--gray-400);">(required to change password)</span></label>
+                <input type="password" class="form-control" id="edit-profile-current-password" placeholder="Enter current password"/>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label><i class="fas fa-key"></i> New Password <span style="font-size:11px;color:var(--gray-400);">(leave blank to keep current)</span></label>
+                <input type="password" class="form-control" id="edit-profile-new-password" placeholder="Enter new password"/>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-check-circle"></i> Confirm New Password</label>
+                <input type="password" class="form-control" id="edit-profile-confirm-password" placeholder="Confirm new password"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('profile-edit-modal')"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn btn-primary" onclick="updateProfile()"><i class="fas fa-save"></i> Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<div id="inactivity-warning" style="display:none; position:fixed; top:0; left:0; right:0; background:#dc3545; color:#fff; padding:14px 20px; text-align:center; font-size:14px; font-weight:600; z-index:9999; box-shadow:0 2px 8px rgba(220,53,69,0.3); animation:slideDownBanner 0.5s ease;">
+    <span>
+        <i class="fas fa-exclamation-triangle"></i>
+        You will be logged out due to inactivity in <strong id="logout-countdown">60</strong> seconds.
+    </span>
+    <div style="display:flex; gap:10px; margin-left:20px;">
+        <button onclick="resetInactivityTimer()" style="background:#fff; color:#dc3545; border:none; padding:6px 18px; border-radius:4px; font-weight:700; font-size:13px; cursor:pointer;">
+            <i class="fas fa-mouse-pointer"></i> Stay Active
+        </button>
+        <button onclick="performLogout('User initiated logout')" style="background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.4); padding:6px 14px; border-radius:4px; font-weight:600; font-size:13px; cursor:pointer;">
+            <i class="fas fa-sign-out-alt"></i> Logout Now
+        </button>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/activity-logs.js"></script>
+
+<style>
+    .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .summary-table thead th {
+        background: var(--gray-100);
+        padding: 10px 12px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--gray-700);
+        border-bottom: 2px solid var(--gray-300);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .summary-table tbody td {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--gray-200);
+        vertical-align: middle;
+        font-size: 12px;
+    }
+    .summary-table tbody tr:hover td {
+        background: var(--gray-100);
+    }
+    .summary-table .dept-header-row td {
+        background: var(--navy);
+        color: white;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+    .summary-table .subtotal-row td {
+        background: var(--gray-200);
+        font-weight: 600;
+        font-size: 12px;
+    }
+    .summary-table .grand-total-row td {
+        background: var(--navy);
+        color: white;
+        font-weight: 700;
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    body.dark-mode .summary-table thead th {
+        background: #1a2a3a;
+        color: #c0ced8;
+        border-color: #2a3a4a;
+    }
+    body.dark-mode .summary-table tbody td {
+        border-color: #2a3a4a;
+    }
+    body.dark-mode .summary-table tbody tr:hover td {
+        background: #2a3a4a;
+    }
+    body.dark-mode .summary-table .subtotal-row td {
+        background: #2a3a4a;
+    }
+    body.dark-mode .summary-table .dept-header-row td {
+        background: var(--navy);
+    }
+    body.dark-mode .summary-table .grand-total-row td {
+        background: var(--navy-dark);
+    }
+    #range-controls {
+        display: none;
+    }
+    #range-controls.show {
+        display: flex !important;
+    }
+    @media (max-width: 768px) {
+        .summary-table {
+            font-size: 11px;
+        }
+        .summary-table thead th,
+        .summary-table tbody td {
+            padding: 6px 8px;
+        }
+        .summary-table .grand-total-row td {
+            font-size: 12px;
+        }
+    }
+</style>
+
+</body>
+</html>

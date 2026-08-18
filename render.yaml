@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: silver-sands-hrms
+    runtime: python
+    plan: free
+    region: ohio
+    
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: DB_NAME
+        value: silver_sands_hrms
+      - key: AUTO_MIGRATE
+        value: true
+      - key: FLASK_DEBUG
+        value: false
+      - key: REDIS_URL
+        fromService:
+          name: hrms-redis
+          type: kv
+          property: host 
+      - key: CACHE_TTL
+        value: 300
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 10000
+    
+    healthCheckPath: /health
+
+  - type: kv
+    name: hrms-redis
+    plan: free
+    region: ohio
