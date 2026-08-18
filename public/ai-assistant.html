@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Assistant - Silver Sands HRMS</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="shortcut icon" href="/assets/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a2a4a;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #c9a84c;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            color: #1a2a4a;
+        }
+
+        .header .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header .user-info .avatar {
+            width: 38px;
+            height: 38px;
+            background: #c9a84c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2a4a;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .header .user-info .user-details {
+            text-align: right;
+        }
+
+        .header .user-info .user-details .name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .header .user-info .user-details .role {
+            font-size: 11px;
+            color: #6a7a8a;
+        }
+
+        .header .user-info .logout-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .header .user-info .logout-btn:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .header .back-btn {
+            color: #1a2a4a;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .header .back-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-header h3 {
+            font-size: 18px;
+            color: #1a2a4a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header h3 i {
+            color: #c9a84c;
+        }
+
+        .card-header .badge {
+            background: #f5edda;
+            color: #1a2a4a;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tips-box {
+            background: #f5edda;
+            padding: 16px 20px;
+            margin: 16px 24px;
+            border-radius: 8px;
+            border-left: 4px solid #c9a84c;
+        }
+
+        .tips-box h4 {
+            color: #1a2a4a;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .tips-box ul {
+            padding-left: 20px;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .tips-box ul li {
+            margin-bottom: 3px;
+        }
+
+        .chat-container {
+            margin: 0 24px 24px 24px;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            height: 420px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .chat-messages .welcome {
+            text-align: center;
+            color: #6a7a8a;
+            padding: 40px 20px;
+        }
+
+        .chat-messages .welcome i {
+            font-size: 52px;
+            color: #c9a84c;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        .chat-messages .welcome h3 {
+            color: #1a2a4a;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .chat-messages .welcome p {
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .chat-messages .welcome .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .chat-messages .welcome .suggestions button {
+            background: #e9ecef;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+
+        .chat-messages .welcome .suggestions button:hover {
+            background: #dee2e6;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            max-width: 85%;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.user {
+            background: #1a2a4a;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            background: white;
+            color: #212529;
+            border: 1px solid #e9ecef;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.assistant p {
+            margin-bottom: 6px;
+        }
+
+        .message.assistant .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .message.assistant .stat-item {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .message.assistant .stat-item .number {
+            font-size: 22px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .message.assistant .stat-item .label {
+            font-size: 10px;
+            color: #6a7a8a;
+        }
+
+        .message.assistant .stat-item.present .number { color: #28a745; }
+        .message.assistant .stat-item.absent .number { color: #dc3545; }
+        .message.assistant .stat-item.sick .number { color: #ff9800; }
+        .message.assistant .stat-item.leave .number { color: #ffc107; }
+        .message.assistant .stat-item.off .number { color: #9e9e9e; }
+
+        .message.assistant .data-table {
+            width: 100%;
+            font-size: 12px;
+            margin-top: 8px;
+            border-collapse: collapse;
+        }
+
+        .message.assistant .data-table th {
+            background: #f8f9fa;
+            padding: 6px 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .message.assistant .data-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .message.assistant .attendance-rate {
+            margin-top: 8px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+            max-width: 60px;
+            margin-right: auto;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #adb5bd;
+            border-radius: 50%;
+            animation: typing 1.4s infinite both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: scale(1); opacity: 0.4; }
+            30% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-input {
+            padding: 12px 16px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1.5px solid #dee2e6;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .chat-input input:focus {
+            border-color: #c9a84c;
+        }
+
+        .chat-input input:disabled {
+            background: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .chat-input .send-btn {
+            background: #c9a84c;
+            color: #1a2a4a;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .chat-input .send-btn:hover {
+            background: #a8883a;
+            transform: translateY(-1px);
+        }
+
+        .chat-input .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-input .clear-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .chat-input .clear-btn:hover {
+            background: #dee2e6;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 12px;
+            color: #6a7a8a;
+            border-top: 1px solid #e9ecef;
+            margin-top: 8px;
+        }
+
+        .footer .ai-badge {
+            color: #c9a84c;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+            .header .logo span {
+                font-size: 14px;
+            }
+            .header .user-info .user-details .name {
+                font-size: 12px;
+            }
+            .container {
+                padding: 0 12px;
+                margin: 16px auto;
+            }
+            .card-header {
+                padding: 14px 16px;
+            }
+            .card-header h3 {
+                font-size: 16px;
+            }
+            .tips-box {
+                margin: 12px 16px;
+                padding: 12px 16px;
+            }
+            .tips-box ul {
+                font-size: 12px;
+            }
+            .chat-container {
+                margin: 0 16px 16px 16px;
+            }
+            .chat-messages {
+                height: 350px;
+                padding: 14px;
+            }
+            .message {
+                max-width: 92%;
+                font-size: 13px;
+                padding: 10px 14px;
+            }
+            .chat-input {
+                padding: 10px 12px;
+                flex-wrap: wrap;
+            }
+            .chat-input input {
+                font-size: 13px;
+            }
+            .chat-input .send-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            .chat-input .clear-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <img src="/assets/logo.png" alt="Logo">
+            <span>Silver Sands HRMS</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <a href="/app" class="back-btn"><i class="fas fa-arrow-left"></i> Back to App</a>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="name" id="user-name">User</div>
+                    <div class="role" id="user-role">Loading...</div>
+                </div>
+                <div class="avatar" id="user-avatar">U</div>
+                <button class="logout-btn" onclick="logout()" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-robot"></i> HR Assistant</h3>
+                <span class="badge"><i class="fas fa-brain"></i> Powered by Gemini AI</span>
+            </div>
+
+            <div class="tips-box">
+                <h4><i class="fas fa-lightbulb"></i> How to use the HR Assistant</h4>
+                <ul>
+                    <li>Ask questions in plain English about employees and attendance</li>
+                    <li>Try: "Show me attendance summary", "Who was absent today?", "List Front Office employees"</li>
+                    <li>The assistant understands department names, employee names, and dates</li>
+                    <li>You'll get instant answers with statistics and tables</li>
+                </ul>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="welcome" id="welcome-message">
+                        <i class="fas fa-robot"></i>
+                        <h3>Welcome to HR Assistant</h3>
+                        <p>Ask me anything about your HR data</p>
+                        <div class="suggestions">
+                            <button onclick="askQuestion('Show me attendance summary')">Attendance summary</button>
+                            <button onclick="askQuestion('Who was absent today?')">Who was absent?</button>
+                            <button onclick="askQuestion('List all employees in Front Office')">Front Office employees</button>
+                            <button onclick="askQuestion('Show best attendance employees')">Best attendance</button>
+                            <button onclick="askQuestion('Compare departments by attendance')">Compare departments</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="Type your question here..." onkeydown="if(event.key==='Enter') sendMessage()">
+                    <button class="clear-btn" onclick="clearChat()" title="Clear chat">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer">
+                <span class="ai-badge"><i class="fas fa-bolt"></i> AI Assistant</span> &middot; 
+                Data is secured and only visible to you &middot; 
+                <span id="session-status">Active session</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getAuthToken() {
+            return localStorage.getItem('hrms_token');
+        }
+
+        function getUser() {
+            var userStr = localStorage.getItem('hrms_user');
+            if (!userStr) return null;
+            return JSON.parse(userStr);
+        }
+
+        function displayUserInfo() {
+            var user = getUser();
+            if (!user) return;
+            
+            document.getElementById('user-name').textContent = user.name || 'User';
+            document.getElementById('user-role').textContent = user.role || 'User';
+            document.getElementById('user-avatar').textContent = (user.name || 'U').charAt(0);
+        }
+
+        function logout() {
+            localStorage.removeItem('hrms_token');
+            localStorage.removeItem('hrms_user');
+            window.location.href = '/login';
+        }
+
+        var messageCount = 0;
+        var isProcessing = false;
+
+        function sendMessage() {
+            var input = document.getElementById('chat-input');
+            var question = input.value.trim();
+            if (!question || isProcessing) return;
+            
+            input.value = '';
+            input.disabled = true;
+            
+            addMessage(question, 'user');
+            showTyping();
+            isProcessing = true;
+            
+            var token = getAuthToken();
+            fetch('/api/ai/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ question: question })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                removeTyping();
+                isProcessing = false;
+                if (data.success) {
+                    addMessage(data.message, 'assistant', data);
+                } else {
+                    addMessage(data.message || 'Sorry, I could not process that request.', 'assistant');
+                }
+                input.disabled = false;
+                input.focus();
+            })
+            .catch(function(err) {
+                removeTyping();
+                isProcessing = false;
+                addMessage('Sorry, something went wrong. Please try again.', 'assistant');
+                input.disabled = false;
+                input.focus();
+            });
+        }
+
+        function askQuestion(question) {
+            document.getElementById('chat-input').value = question;
+            sendMessage();
+        }
+
+        function addMessage(text, sender, data) {
+            var container = document.getElementById('chat-messages');
+            
+            // Remove welcome message if it exists
+            var welcome = document.getElementById('welcome-message');
+            if (welcome) welcome.remove();
+            
+            var msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + sender;
+            
+            if (sender === 'assistant' && data) {
+                var formattedText = formatResponse(text, data);
+                msgDiv.innerHTML = formattedText;
+            } else {
+                msgDiv.textContent = text;
+            }
+            
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+            messageCount++;
+        }
+
+        function formatResponse(text, data) {
+            var html = '<p>' + text + '</p>';
+            
+            if (data.type === 'stats' && data.data) {
+                var stats = data.data;
+                html += '<div class="stat-grid">';
+                html += '<div class="stat-item present"><span class="number">' + stats.present + '</span><span class="label">Present</span></div>';
+                html += '<div class="stat-item absent"><span class="number">' + stats.absent + '</span><span class="label">Absent</span></div>';
+                html += '<div class="stat-item sick"><span class="number">' + stats.sick + '</span><span class="label">Sick</span></div>';
+                html += '<div class="stat-item leave"><span class="number">' + stats.leave + '</span><span class="label">Leave</span></div>';
+                html += '<div class="stat-item off"><span class="number">' + stats.day_off + '</span><span class="label">Day Off</span></div>';
+                html += '</div>';
+                if (stats.attendance_rate !== undefined) {
+                    html += '<div class="attendance-rate">Attendance Rate: ' + stats.attendance_rate + '%</div>';
+                }
+                if (stats.total_employees !== undefined) {
+                    html += '<div style="font-size:12px;color:#6a7a8a;margin-top:4px;">' + stats.total_employees + ' employees · ' + stats.total_days + ' total days</div>';
+                }
+            }
+            
+            if (data.type === 'employee_stats' && data.data) {
+                var emp = data.data;
+                html += '<div class="stat-grid">';
+                html += '<div class="stat-item present"><span class="number">' + emp.present + '</span><span class="label">Present</span></div>';
+                html += '<div class="stat-item absent"><span class="number">' + emp.absent + '</span><span class="label">Absent</span></div>';
+                html += '<div class="stat-item sick"><span class="number">' + emp.sick + '</span><span class="label">Sick</span></div>';
+                html += '<div class="stat-item leave"><span class="number">' + emp.leave + '</span><span class="label">Leave</span></div>';
+                html += '<div class="stat-item off"><span class="number">' + emp.day_off + '</span><span class="label">Day Off</span></div>';
+                html += '</div>';
+                if (emp.attendance_rate !== undefined) {
+                    html += '<div class="attendance-rate">Attendance Rate: ' + emp.attendance_rate + '%</div>';
+                }
+                html += '<div style="font-size:12px;color:#6a7a8a;margin-top:4px;">' + emp.department + ' · ' + emp.position + '</div>';
+            }
+            
+            if (data.type === 'departments' && data.data) {
+                html += '<table class="data-table">';
+                html += '<thead><tr><th>Department</th><th>Rate</th><th>P</th><th>A</th><th>S</th><th>L</th><th>O</th></tr></thead><tbody>';
+                for (var dept in data.data) {
+                    var stats = data.data[dept];
+                    var total = stats.p + stats.a + stats.s + stats.l + stats.o;
+                    var rate = total > 0 ? Math.round((stats.p / total) * 100) : 0;
+                    html += '<tr>';
+                    html += '<td>' + dept + '</td>';
+                    html += '<td>' + rate + '%</td>';
+                    html += '<td>' + stats.p + '</td>';
+                    html += '<td>' + stats.a + '</td>';
+                    html += '<td>' + stats.s + '</td>';
+                    html += '<td>' + stats.l + '</td>';
+                    html += '<td>' + stats.o + '</td>';
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+            }
+            
+            if (data.type === 'list' && data.data && data.data.length > 0) {
+                html += '<table class="data-table">';
+                html += '<thead><tr>';
+                if (data.data[0].name) html += '<th>Name</th>';
+                if (data.data[0].department) html += '<th>Department</th>';
+                if (data.data[0].position) html += '<th>Position</th>';
+                if (data.data[0].absent_days !== undefined) html += '<th>Absent Days</th>';
+                if (data.data[0].attendance_rate !== undefined) html += '<th>Rate</th>';
+                html += '</tr></thead><tbody>';
+                
+                data.data.forEach(function(item) {
+                    html += '<tr>';
+                    if (item.name) html += '<td>' + item.name + '</td>';
+                    if (item.department) html += '<td>' + item.department + '</td>';
+                    if (item.position) html += '<td>' + item.position + '</td>';
+                    if (item.absent_days !== undefined) html += '<td>' + item.absent_days + '</td>';
+                    if (item.attendance_rate !== undefined) html += '<td>' + item.attendance_rate + '%</td>';
+                    html += '</tr>';
+                });
+                html += '</tbody></table>';
+            }
+            
+            return html;
+        }
+
+        function showTyping() {
+            var container = document.getElementById('chat-messages');
+            var typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTyping() {
+            var typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        function clearChat() {
+            var container = document.getElementById('chat-messages');
+            container.innerHTML = `
+                <div class="welcome" id="welcome-message">
+                    <i class="fas fa-robot"></i>
+                    <h3>Welcome to HR Assistant</h3>
+                    <p>Ask me anything about your HR data</p>
+                    <div class="suggestions">
+                        <button onclick="askQuestion('Show me attendance summary')">Attendance summary</button>
+                        <button onclick="askQuestion('Who was absent today?')">Who was absent?</button>
+                        <button onclick="askQuestion('List all employees in Front Office')">Front Office employees</button>
+                        <button onclick="askQuestion('Show best attendance employees')">Best attendance</button>
+                        <button onclick="askQuestion('Compare departments by attendance')">Compare departments</button>
+                    </div>
+                </div>
+            `;
+            messageCount = 0;
+            document.getElementById('chat-input').focus();
+        }
+
+        function checkAuth() {
+            var token = getAuthToken();
+            if (!token) {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            // Verify token
+            fetch('/api/verify', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    localStorage.removeItem('hrms_token');
+                    localStorage.removeItem('hrms_user');
+                    window.location.href = '/login';
+                }
+            })
+            .catch(function() {
+                localStorage.removeItem('hrms_token');
+                localStorage.removeItem('hrms_user');
+                window.location.href = '/login';
+            });
+            
+            return true;
+        }
+
+        function init() {
+            if (!checkAuth()) return;
+            displayUserInfo();
+            
+            document.getElementById('session-status').textContent = 'Active session';
+            
+            document.getElementById('chat-input').focus();
+        }
+
+        var inactivityTimer;
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(function() {
+                logout();
+            }, 10 * 60 * 1000);
+        }
+
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keydown', resetInactivityTimer);
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('scroll', resetInactivityTimer);
+
+        init();
+        resetInactivityTimer();
+    </script>
+
+</body>
+</html>

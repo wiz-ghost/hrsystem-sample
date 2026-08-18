@@ -447,6 +447,64 @@ def fix_existing_employee_numbers():
     except Exception as e:
         print(f"Error fixing employee numbers: {e}")
 
+def initialize_default_users():
+    try:
+        if users_collection.count_documents({}) > 0:
+            print("Users already exist - skipping default user creation")
+            return
+    except:
+        print("Could not check users - skipping default user creation")
+        return
+    
+    print("Creating default users...")
+    default_users = [
+        {
+            "_id": "dev_001",
+            "username": "developer",
+            "password": "192.168.1.1",
+            "name": "Timothy Kandiero",
+            "role": "IT Specialist",
+            "department": "IT",
+            "created_at": datetime.datetime.now().isoformat()
+        },
+        {
+            "_id": "sp_001",
+            "username": "supervisor",
+            "password": "super2026",
+            "name": "Luckymore Kaphamtengo",
+            "role": "Supervisor",
+            "department": "Management",
+            "created_at": datetime.datetime.now().isoformat()
+        },
+        {
+            "_id": "admin_001",
+            "username": "admin",
+            "password": "smooth",
+            "name": "Susan Kasola",
+            "role": "System Admin",
+            "department": "Admin & Accounts",
+            "created_at": datetime.datetime.now().isoformat()
+        },
+        {
+            "_id": "front_001",
+            "username": "front",
+            "password": "frontview",
+            "name": "Front Office Viewer",
+            "role": "Viewer",
+            "department": "Front Office",
+            "created_at": datetime.datetime.now().isoformat()
+        }
+    ]
+    
+    for user in default_users:
+        try:
+            users_collection.insert_one(user)
+            print(f"   Default user created: {user['username']}")
+        except DuplicateKeyError:
+            print(f"   User already exists: {user['username']}")
+        except Exception as e:
+            print(f"   Error creating user {user['username']}: {e}")
+
 def ensure_period_exists():
     try:
         periods = attendance_collection.distinct('period')
@@ -1735,6 +1793,571 @@ def delete_user(user_id):
         print(f"Error deleting user: {e}")
         return jsonify({"error": "Failed to delete user"}), 500
 
+@app.route('/api/ai/ask', methods=['POST'])
+@auth_required
+def ai_ask():
+    try:
+        data = request.get_json()
+        question = data.get('question', '').strip()
+        
+        if not question:
+            return jsonify({
+                "success": False,
+                "message": "Please ask a question",
+                "type": "error"
+            })
+        
+        result = get_ai_response(question, request.user)
+        
+        log_activity(
+            user=request.user,
+            action='AI_QUERY',
+            details={
+                'question': question,
+                'result_type': result.get('type', 'unknown')
+            },
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"AI API Error: {e}")
+        return jsonify({
+            "success": False,
+            "message": "Something went wrong. Please try again.",
+            "type": "error"
+        })
+
+def get_ai_response(user_question, user_info=None):
+    try:
+        import google.generativeai as genai
+        
+        GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+        
+        if not GEMINI_API_KEY:
+            return {
+                "success": False,
+                "message": "AI service is not configured. Please contact IT support.",
+                "type": "error"
+            }
+        
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel('gemini-pro')
+        
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        current_period = get_current_period()
+        today_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        
+        system_prompt = f"""You are an HR assistant for Silver Sands Salima - a resort in Malawi.
+        Your job is to help users get information from the HR database.
+        
+        The database contains:
+        - Employees: name (full name), department (Admin & Accounts, Front Office, Food & Beverage, Housekeeping & Laundry, Maintenance, Attachment, Security), position, employee_no, join_date, day_off (Monday-Sunday or None)
+        - Attendance: period (YYYY-MM), employee_id, date (YYYY-MM-DD), status (P=Present, A=Absent, S=Sick, L=Leave, O=Day Off)
+        - Payroll periods: YYYY-MM format, runs 27th to 26th of each month
+        
+        CURRENT DATE: {current_date}
+        CURRENT PERIOD: {current_period}
+        TODAY: {today_date}
+        
+        Available operations you can call:
+        1. get_employees_by_department(department) - Get all employees in a department
+        2. get_employee_by_name(name) - Find employee by name (partial match)
+        3. get_attendance_summary(period, department?) - Get summary with totals
+        4. get_attendance_stats(period) - Get overall stats for a period
+        5. get_department_attendance(period) - Compare departments
+        6. get_absent_employees(period, min_days) - Find employees with X+ absences
+        7. get_best_attendance(period, limit) - Top performers
+        8. get_worst_attendance(period, limit) - Bottom performers
+        9. get_employees_by_day_off(day) - Find employees with specific day off
+        10. get_all_employees() - List all employees
+        11. get_employee_attendance_totals(employee_name) - Get P,A,S,L,O totals
+        
+        Respond ONLY with a JSON object in this exact format:
+        {{
+            "operation": "operation_name",
+            "params": {{ "param1": "value1", "param2": "value2" }},
+            "explanation": "brief explanation of what you understood"
+        }}
+        
+        If the question is NOT about HR data, respond with:
+        {{
+            "operation": "general",
+            "message": "I'm here to help with HR data. Please ask about employees or attendance."
+        }}
+        
+        Rules:
+        - If no period is mentioned, use current period: {current_period}
+        - Department names must match exactly (case insensitive)
+        - For "today", use today's date: {today_date}
+        - For employee names, allow partial matching"""
+
+        response = model.generate_content(system_prompt + "\n\nUser Question: " + user_question)
+        ai_text = response.text.strip()
+        
+        import re
+        json_match = re.search(r'\{.*\}', ai_text, re.DOTALL)
+        if json_match:
+            action = json.loads(json_match.group())
+        else:
+            action = json.loads(ai_text)
+        
+        if action.get('operation') == 'general':
+            return {
+                "success": True,
+                "message": action.get('message', "I'm here to help with HR data."),
+                "type": "general"
+            }
+        
+        result = execute_ai_operation(action)
+        return result
+        
+    except Exception as e:
+        print(f"AI Error: {e}")
+        return {
+            "success": False,
+            "message": "Sorry, I'm having trouble right now. Please try again later.",
+            "type": "error"
+        }
+
+def execute_ai_operation(action):
+    operation = action.get('operation')
+    params = action.get('params', {})
+    
+    try:
+        if operation == 'get_employees_by_department':
+            department = params.get('department', '').strip()
+            if not department:
+                return {
+                    "success": False,
+                    "message": "Please specify a department name.",
+                    "type": "error"
+                }
+            
+            employees = list(employees_collection.find({
+                'department': {'$regex': department, '$options': 'i'}
+            }))
+            
+            if employees:
+                return {
+                    "success": True,
+                    "message": f"Found {len(employees)} employees in {department.title()}:",
+                    "data": employees,
+                    "type": "list"
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": f"No employees found in {department.title()}",
+                    "data": [],
+                    "type": "empty"
+                }
+        
+        elif operation == 'get_employee_by_name':
+            name = params.get('name', '').strip()
+            if not name:
+                return {
+                    "success": False,
+                    "message": "Please specify an employee name.",
+                    "type": "error"
+                }
+            
+            employees = list(employees_collection.find({
+                'name': {'$regex': name, '$options': 'i'}
+            }))
+            
+            if employees:
+                return {
+                    "success": True,
+                    "message": f"Found {len(employees)} employees matching '{name}':",
+                    "data": employees,
+                    "type": "list"
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": f"No employees found matching '{name}'",
+                    "data": [],
+                    "type": "empty"
+                }
+        
+        elif operation == 'get_attendance_summary':
+            period = params.get('period', get_current_period())
+            department = params.get('department')
+            
+            query = {}
+            if department:
+                query['department'] = {'$regex': department, '$options': 'i'}
+            employees = list(employees_collection.find(query))
+            
+            att_records = list(attendance_collection.find({'period': period}))
+            att_data = {}
+            for rec in att_records:
+                emp_id = rec.get('employee_id')
+                if emp_id and emp_id != '__init__':
+                    if emp_id not in att_data:
+                        att_data[emp_id] = {}
+                    att_data[emp_id][rec.get('date')] = rec.get('status', '')
+            
+            total_p = total_a = total_s = total_l = total_o = 0
+            total_employees = len(employees)
+            
+            for emp in employees:
+                emp_att = att_data.get(emp['_id'], {})
+                for status in emp_att.values():
+                    if status == 'P': total_p += 1
+                    elif status == 'A': total_a += 1
+                    elif status == 'S': total_s += 1
+                    elif status == 'L': total_l += 1
+                    elif status == 'O': total_o += 1
+            
+            total_days = total_p + total_a + total_s + total_l + total_o
+            attendance_rate = round((total_p / total_days * 100) if total_days > 0 else 0, 1)
+            
+            dept_text = f" in {department.title()}" if department else ""
+            
+            return {
+                "success": True,
+                "message": f"Attendance summary for {period}{dept_text}:",
+                "data": {
+                    "period": period,
+                    "department": department,
+                    "total_employees": total_employees,
+                    "present": total_p,
+                    "absent": total_a,
+                    "sick": total_s,
+                    "leave": total_l,
+                    "day_off": total_o,
+                    "total_days": total_days,
+                    "attendance_rate": attendance_rate
+                },
+                "type": "stats"
+            }
+        
+        elif operation == 'get_attendance_stats':
+            period = params.get('period', get_current_period())
+            
+            att_records = list(attendance_collection.find({'period': period}))
+            total_p = total_a = total_s = total_l = total_o = 0
+            
+            for rec in att_records:
+                status = rec.get('status', '')
+                if status == 'P': total_p += 1
+                elif status == 'A': total_a += 1
+                elif status == 'S': total_s += 1
+                elif status == 'L': total_l += 1
+                elif status == 'O': total_o += 1
+            
+            total_days = total_p + total_a + total_s + total_l + total_o
+            attendance_rate = round((total_p / total_days * 100) if total_days > 0 else 0, 1)
+            
+            return {
+                "success": True,
+                "message": f"Attendance statistics for {period}:",
+                "data": {
+                    "period": period,
+                    "present": total_p,
+                    "absent": total_a,
+                    "sick": total_s,
+                    "leave": total_l,
+                    "day_off": total_o,
+                    "total_days": total_days,
+                    "attendance_rate": attendance_rate
+                },
+                "type": "stats"
+            }
+        
+        elif operation == 'get_department_attendance':
+            period = params.get('period', get_current_period())
+            
+            employees = list(employees_collection.find())
+            att_records = list(attendance_collection.find({'period': period}))
+            
+            att_data = {}
+            for rec in att_records:
+                emp_id = rec.get('employee_id')
+                if emp_id and emp_id != '__init__':
+                    if emp_id not in att_data:
+                        att_data[emp_id] = {}
+                    att_data[emp_id][rec.get('date')] = rec.get('status', '')
+            
+            dept_stats = {}
+            for emp in employees:
+                dept = emp.get('department', 'Unknown')
+                if dept not in dept_stats:
+                    dept_stats[dept] = {'p': 0, 'a': 0, 's': 0, 'l': 0, 'o': 0}
+                
+                emp_att = att_data.get(emp['_id'], {})
+                for status in emp_att.values():
+                    if status == 'P': dept_stats[dept]['p'] += 1
+                    elif status == 'A': dept_stats[dept]['a'] += 1
+                    elif status == 'S': dept_stats[dept]['s'] += 1
+                    elif status == 'L': dept_stats[dept]['l'] += 1
+                    elif status == 'O': dept_stats[dept]['o'] += 1
+            
+            return {
+                "success": True,
+                "message": f"Department attendance for {period}:",
+                "data": dept_stats,
+                "type": "departments"
+            }
+        
+        elif operation == 'get_absent_employees':
+            period = params.get('period', get_current_period())
+            min_days = params.get('min_days', 3)
+            
+            employees = list(employees_collection.find())
+            att_records = list(attendance_collection.find({'period': period}))
+            
+            att_data = {}
+            for rec in att_records:
+                emp_id = rec.get('employee_id')
+                if emp_id and emp_id != '__init__':
+                    if emp_id not in att_data:
+                        att_data[emp_id] = {}
+                    att_data[emp_id][rec.get('date')] = rec.get('status', '')
+            
+            absent_employees = []
+            for emp in employees:
+                emp_att = att_data.get(emp['_id'], {})
+                absent_count = sum(1 for status in emp_att.values() if status == 'A')
+                if absent_count >= min_days:
+                    absent_employees.append({
+                        'name': emp.get('name'),
+                        'department': emp.get('department'),
+                        'position': emp.get('position'),
+                        'absent_days': absent_count
+                    })
+            
+            if absent_employees:
+                return {
+                    "success": True,
+                    "message": f"Employees with {min_days}+ absences:",
+                    "data": absent_employees,
+                    "type": "list"
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": f"No employees with {min_days}+ absences",
+                    "data": [],
+                    "type": "empty"
+                }
+        
+        elif operation == 'get_best_attendance':
+            period = params.get('period', get_current_period())
+            limit = params.get('limit', 5)
+            
+            employees = list(employees_collection.find())
+            att_records = list(attendance_collection.find({'period': period}))
+            
+            att_data = {}
+            for rec in att_records:
+                emp_id = rec.get('employee_id')
+                if emp_id and emp_id != '__init__':
+                    if emp_id not in att_data:
+                        att_data[emp_id] = {}
+                    att_data[emp_id][rec.get('date')] = rec.get('status', '')
+            
+            emp_stats = []
+            for emp in employees:
+                emp_att = att_data.get(emp['_id'], {})
+                total = len(emp_att)
+                if total > 0:
+                    present = sum(1 for status in emp_att.values() if status == 'P')
+                    rate = round((present / total * 100), 1)
+                    emp_stats.append({
+                        'name': emp.get('name'),
+                        'department': emp.get('department'),
+                        'position': emp.get('position'),
+                        'attendance_rate': rate,
+                        'present': present,
+                        'total': total
+                    })
+            
+            emp_stats.sort(key=lambda x: x['attendance_rate'], reverse=True)
+            top_employees = emp_stats[:limit]
+            
+            return {
+                "success": True,
+                "message": f"Top {limit} employees by attendance:",
+                "data": top_employees,
+                "type": "list"
+            }
+        
+        elif operation == 'get_worst_attendance':
+            period = params.get('period', get_current_period())
+            limit = params.get('limit', 5)
+            
+            employees = list(employees_collection.find())
+            att_records = list(attendance_collection.find({'period': period}))
+            
+            att_data = {}
+            for rec in att_records:
+                emp_id = rec.get('employee_id')
+                if emp_id and emp_id != '__init__':
+                    if emp_id not in att_data:
+                        att_data[emp_id] = {}
+                    att_data[emp_id][rec.get('date')] = rec.get('status', '')
+            
+            emp_stats = []
+            for emp in employees:
+                emp_att = att_data.get(emp['_id'], {})
+                total = len(emp_att)
+                if total > 0:
+                    present = sum(1 for status in emp_att.values() if status == 'P')
+                    rate = round((present / total * 100), 1)
+                    emp_stats.append({
+                        'name': emp.get('name'),
+                        'department': emp.get('department'),
+                        'position': emp.get('position'),
+                        'attendance_rate': rate,
+                        'present': present,
+                        'total': total
+                    })
+            
+            emp_stats.sort(key=lambda x: x['attendance_rate'])
+            bottom_employees = emp_stats[:limit]
+            
+            return {
+                "success": True,
+                "message": f"Bottom {limit} employees by attendance:",
+                "data": bottom_employees,
+                "type": "list"
+            }
+        
+        elif operation == 'get_employees_by_day_off':
+            day = params.get('day', '').strip()
+            if not day:
+                return {
+                    "success": False,
+                    "message": "Please specify a day (Monday, Tuesday, etc.)",
+                    "type": "error"
+                }
+            
+            employees = list(employees_collection.find({
+                'day_off': {'$regex': day, '$options': 'i'}
+            }))
+            
+            if employees:
+                return {
+                    "success": True,
+                    "message": f"Employees with {day.title()} as day off:",
+                    "data": employees,
+                    "type": "list"
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": f"No employees with {day.title()} as day off",
+                    "data": [],
+                    "type": "empty"
+                }
+        
+        elif operation == 'get_all_employees':
+            employees = list(employees_collection.find())
+            if employees:
+                return {
+                    "success": True,
+                    "message": f"All employees ({len(employees)} total):",
+                    "data": employees,
+                    "type": "list"
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": "No employees found",
+                    "data": [],
+                    "type": "empty"
+                }
+        
+        elif operation == 'get_employee_attendance_totals':
+            name = params.get('employee_name', '').strip()
+            if not name:
+                return {
+                    "success": False,
+                    "message": "Please specify an employee name.",
+                    "type": "error"
+                }
+            
+            emp = employees_collection.find_one({
+                'name': {'$regex': name, '$options': 'i'}
+            })
+            
+            if not emp:
+                return {
+                    "success": True,
+                    "message": f"No employee found matching '{name}'",
+                    "data": [],
+                    "type": "empty"
+                }
+            
+            period = params.get('period', get_current_period())
+            
+            att_records = list(attendance_collection.find({
+                'employee_id': emp['_id'],
+                'period': period
+            }))
+            
+            p = a = s = l = o = 0
+            for rec in att_records:
+                status = rec.get('status', '')
+                if status == 'P': p += 1
+                elif status == 'A': a += 1
+                elif status == 'S': s += 1
+                elif status == 'L': l += 1
+                elif status == 'O': o += 1
+            
+            total = p + a + s + l + o
+            rate = round((p / total * 100) if total > 0 else 0, 1)
+            
+            return {
+                "success": True,
+                "message": f"Attendance totals for {emp['name']} ({period}):",
+                "data": {
+                    'employee': emp['name'],
+                    'department': emp.get('department'),
+                    'position': emp.get('position'),
+                    'period': period,
+                    'present': p,
+                    'absent': a,
+                    'sick': s,
+                    'leave': l,
+                    'day_off': o,
+                    'total_days': total,
+                    'attendance_rate': rate
+                },
+                "type": "employee_stats"
+            }
+        
+        else:
+            return {
+                "success": False,
+                "message": "I couldn't find the information you're looking for.",
+                "type": "error"
+            }
+            
+    except Exception as e:
+        print(f"Operation execution error: {e}")
+        return {
+            "success": False,
+            "message": "Sorry, I encountered an error while retrieving data.",
+            "type": "error"
+        }
+
+def get_current_period():
+    now = datetime.datetime.now()
+    day = now.day
+    year = now.year
+    month = now.month
+    if day >= 27:
+        month += 1
+        if month > 12:
+            month = 1
+            year += 1
+    return f"{year}-{str(month).zfill(2)}"
+
 @app.route('/')
 def serve_login():
     return send_from_directory('public', 'login.html')
@@ -1746,6 +2369,10 @@ def serve_login_page():
 @app.route('/app')
 def serve_app():
     return send_from_directory('public', 'index.html')
+
+@app.route('/ai-assistant')
+def serve_ai_assistant():
+    return send_from_directory('public', 'ai-assistant.html')
 
 @app.route('/<path:path>')
 def serve_static(path):
@@ -1780,5 +2407,20 @@ if __name__ == '__main__':
     initialize_default_users()
     ensure_period_exists()
     
+    print("\n" + "=" * 55)
+    print("    SILVER SANDS SALIMA HRMS")
+    print("=" * 55)
+    print(f"    Server running on port: {port}")
+    print(f"    Database: MongoDB Atlas")
+    print(f"    Mode: {'Development' if FLASK_DEBUG else 'Production'}")
+    print(f"    Auto-Migration: {'ENABLED' if AUTO_MIGRATE else 'DISABLED'}")
+    print("=" * 55)
+    print(f"\nOpen: http://localhost:{port}")
+    print("Login: developer / 192.168.1.1")
+    print("Supervisor: supervisor / super2026")
+    print("Admin: admin / smooth")
+    print("Front Viewer: front / frontview")
+    print("\nAI Assistant: http://localhost:{port}/ai-assistant")
+    print("=" * 55 + "\n")
     
     app.run(host='0.0.0.0', port=port, debug=FLASK_DEBUG, threaded=True)
