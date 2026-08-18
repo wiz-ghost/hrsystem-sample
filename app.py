@@ -4,6 +4,7 @@ import datetime
 import base64
 import sys
 import calendar
+import re
 from flask import Flask, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS
 from pymongo import MongoClient
@@ -13,6 +14,7 @@ import io
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+import openai
 
 app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
@@ -21,6 +23,14 @@ MONGO_URI = os.environ.get('MONGO_URI')
 DB_NAME = os.environ.get('DB_NAME', 'silver_sands_hrms')
 AUTO_MIGRATE = os.environ.get('AUTO_MIGRATE', 'false').lower() == 'true'
 FLASK_DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+
+# Configure OpenAI
+if OPENAI_API_KEY:
+    openai.api_key = OPENAI_API_KEY
+    print(" OpenAI configured successfully")
+else:
+    print(" OPENAI_API_KEY not found in environment variables")
 
 print("\n" + "=" * 55)
 print("    SILVER SANDS SALIMA HRMS - STARTING")
@@ -28,6 +38,7 @@ print("=" * 55)
 print(f"Database Name: {DB_NAME}")
 print(f"Auto-Migration: {AUTO_MIGRATE}")
 print(f"Debug Mode: {FLASK_DEBUG}")
+print(f"OpenAI: {'Enabled' if OPENAI_API_KEY else 'Disabled'}")
 print("=" * 55)
 
 client = None
@@ -58,7 +69,6 @@ try:
         
         sessions_collection = db['sessions']
         sessions_collection.create_index([('user_id', 1)])
-        sessions_collection.create_index([('expires_at', 1)], expire_after_seconds=0)
         print(" Created MongoDB indexes")
     except Exception as e:
         print(f" Index creation skipped: {e}")
@@ -1793,6 +1803,10 @@ def delete_user(user_id):
         print(f"Error deleting user: {e}")
         return jsonify({"error": "Failed to delete user"}), 500
 
+# ============================================================
+# AI ASSISTANT ROUTES - OpenAI Integration
+# ============================================================
+
 @app.route('/api/ai/ask', methods=['POST'])
 @auth_required
 def ai_ask():
@@ -1804,6 +1818,13 @@ def ai_ask():
             return jsonify({
                 "success": False,
                 "message": "Please ask a question",
+                "type": "error"
+            })
+        
+        if not OPENAI_API_KEY:
+            return jsonify({
+                "success": False,
+                "message": "AI service is not configured. Please contact IT support.",
                 "type": "error"
             })
         
@@ -1825,83 +1846,84 @@ def ai_ask():
         print(f"AI API Error: {e}")
         return jsonify({
             "success": False,
-            "message": "Something went wrong. Please try again.",
+            "message": "Something went wrong. Please try again later.",
             "type": "error"
         })
 
 def get_ai_response(user_question, user_info=None):
     try:
-        import google.generativeai as genai
-        
-        GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
-        
-        if not GEMINI_API_KEY:
+        if not OPENAI_API_KEY:
             return {
                 "success": False,
-                "message": "AI service is not configured. Please contact IT support.",
+                "message": "AI service is not available. Please contact IT support.",
                 "type": "error"
             }
-        
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-pro')
         
         current_date = datetime.datetime.now().strftime("%Y-%m-%d")
         current_period = get_current_period()
         today_date = datetime.datetime.now().strftime("%Y-%m-%d")
         
         system_prompt = f"""You are an HR assistant for Silver Sands Salima - a resort in Malawi.
-        Your job is to help users get information from the HR database.
-        
-        The database contains:
-        - Employees: name (full name), department (Admin & Accounts, Front Office, Food & Beverage, Housekeeping & Laundry, Maintenance, Attachment, Security), position, employee_no, join_date, day_off (Monday-Sunday or None)
-        - Attendance: period (YYYY-MM), employee_id, date (YYYY-MM-DD), status (P=Present, A=Absent, S=Sick, L=Leave, O=Day Off)
-        - Payroll periods: YYYY-MM format, runs 27th to 26th of each month
-        
-        CURRENT DATE: {current_date}
-        CURRENT PERIOD: {current_period}
-        TODAY: {today_date}
-        
-        Available operations you can call:
-        1. get_employees_by_department(department) - Get all employees in a department
-        2. get_employee_by_name(name) - Find employee by name (partial match)
-        3. get_attendance_summary(period, department?) - Get summary with totals
-        4. get_attendance_stats(period) - Get overall stats for a period
-        5. get_department_attendance(period) - Compare departments
-        6. get_absent_employees(period, min_days) - Find employees with X+ absences
-        7. get_best_attendance(period, limit) - Top performers
-        8. get_worst_attendance(period, limit) - Bottom performers
-        9. get_employees_by_day_off(day) - Find employees with specific day off
-        10. get_all_employees() - List all employees
-        11. get_employee_attendance_totals(employee_name) - Get P,A,S,L,O totals
-        
-        Respond ONLY with a JSON object in this exact format:
-        {{
-            "operation": "operation_name",
-            "params": {{ "param1": "value1", "param2": "value2" }},
-            "explanation": "brief explanation of what you understood"
-        }}
-        
-        If the question is NOT about HR data, respond with:
-        {{
-            "operation": "general",
-            "message": "I'm here to help with HR data. Please ask about employees or attendance."
-        }}
-        
-        Rules:
-        - If no period is mentioned, use current period: {current_period}
-        - Department names must match exactly (case insensitive)
-        - For "today", use today's date: {today_date}
-        - For employee names, allow partial matching"""
 
-        response = model.generate_content(system_prompt + "\n\nUser Question: " + user_question)
-        ai_text = response.text.strip()
+The database contains:
+- Employees: name, department, position, employee_no, join_date, day_off
+- Attendance: period, employee_id, date, status (P=Present, A=Absent, S=Sick, L=Leave, O=Day Off)
+
+Current date: {current_date}
+Current period: {current_period}
+
+Available operations:
+1. get_employees_by_department(department)
+2. get_employee_by_name(name)
+3. get_attendance_summary(period, department)
+4. get_attendance_stats(period)
+5. get_department_attendance(period)
+6. get_absent_employees(period, min_days)
+7. get_best_attendance(period, limit)
+8. get_worst_attendance(period, limit)
+9. get_employees_by_day_off(day)
+10. get_all_employees()
+11. get_employee_attendance_totals(employee_name)
+
+Respond ONLY with a JSON object in this exact format:
+{{"operation": "operation_name", "params": {{"param1": "value1"}}, "explanation": "brief explanation"}}
+
+If the question is NOT about HR data:
+{{"operation": "general", "message": "I'm here to help with HR data."}}"""
+
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_question}
+                ],
+                temperature=0.3,
+                max_tokens=300
+            )
+            ai_text = response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"OpenAI API call failed: {e}")
+            return {
+                "success": False,
+                "message": "The AI service is currently unavailable. Please try again later.",
+                "type": "error"
+            }
         
-        import re
-        json_match = re.search(r'\{.*\}', ai_text, re.DOTALL)
-        if json_match:
-            action = json.loads(json_match.group())
-        else:
-            action = json.loads(ai_text)
+        try:
+            json_match = re.search(r'\{.*\}', ai_text, re.DOTALL)
+            if json_match:
+                action = json.loads(json_match.group())
+            else:
+                action = json.loads(ai_text)
+        except json.JSONDecodeError as e:
+            print(f"JSON parsing error: {e}")
+            print(f"Raw response: {ai_text}")
+            return {
+                "success": False,
+                "message": "I couldn't understand that. Please try rephrasing.",
+                "type": "error"
+            }
         
         if action.get('operation') == 'general':
             return {
@@ -2358,6 +2380,10 @@ def get_current_period():
             year += 1
     return f"{year}-{str(month).zfill(2)}"
 
+# ============================================================
+# STATIC ROUTES
+# ============================================================
+
 @app.route('/')
 def serve_login():
     return send_from_directory('public', 'login.html')
@@ -2414,6 +2440,7 @@ if __name__ == '__main__':
     print(f"    Database: MongoDB Atlas")
     print(f"    Mode: {'Development' if FLASK_DEBUG else 'Production'}")
     print(f"    Auto-Migration: {'ENABLED' if AUTO_MIGRATE else 'DISABLED'}")
+    print(f"    OpenAI: {'ENABLED' if OPENAI_API_KEY else 'DISABLED'}")
     print("=" * 55)
     print(f"\nOpen: http://localhost:{port}")
     print("Login: developer / 192.168.1.1")
