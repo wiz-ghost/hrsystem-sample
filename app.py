@@ -15,6 +15,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 import openai
+from openai import OpenAI
 
 app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
@@ -26,9 +27,15 @@ FLASK_DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
 # Configure OpenAI
+openai_client = None
 if OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY
-    print(" OpenAI configured successfully")
+    try:
+        openai_client = OpenAI(api_key=OPENAI_API_KEY)
+        print(" OpenAI configured successfully")
+        print(f" API Key starts with: {OPENAI_API_KEY[:15]}...")
+    except Exception as e:
+        print(f" OpenAI configuration error: {e}")
+        openai_client = None
 else:
     print(" OPENAI_API_KEY not found in environment variables")
 
@@ -38,7 +45,7 @@ print("=" * 55)
 print(f"Database Name: {DB_NAME}")
 print(f"Auto-Migration: {AUTO_MIGRATE}")
 print(f"Debug Mode: {FLASK_DEBUG}")
-print(f"OpenAI: {'Enabled' if OPENAI_API_KEY else 'Disabled'}")
+print(f"OpenAI: {'Enabled' if openai_client else 'Disabled'}")
 print("=" * 55)
 
 client = None
@@ -1821,7 +1828,7 @@ def ai_ask():
                 "type": "error"
             })
         
-        if not OPENAI_API_KEY:
+        if not openai_client:
             return jsonify({
                 "success": False,
                 "message": "AI service is not configured. Please contact IT support.",
@@ -1852,7 +1859,7 @@ def ai_ask():
 
 def get_ai_response(user_question, user_info=None):
     try:
-        if not OPENAI_API_KEY:
+        if not openai_client:
             return {
                 "success": False,
                 "message": "AI service is not available. Please contact IT support.",
@@ -1863,7 +1870,7 @@ def get_ai_response(user_question, user_info=None):
         current_period = get_current_period()
         today_date = datetime.datetime.now().strftime("%Y-%m-%d")
         
-        system_prompt = f"""You are an HR assistant for Silver Sands Salima - a resort in Malawi.
+        system_prompt = f"""You are an HR assistant for Silver Sands Salima.
 
 The database contains:
 - Employees: name, department, position, employee_no, join_date, day_off
@@ -1892,7 +1899,7 @@ If the question is NOT about HR data:
 {{"operation": "general", "message": "I'm here to help with HR data."}}"""
 
         try:
-            response = openai.ChatCompletion.create(
+            response = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -2440,7 +2447,7 @@ if __name__ == '__main__':
     print(f"    Database: MongoDB Atlas")
     print(f"    Mode: {'Development' if FLASK_DEBUG else 'Production'}")
     print(f"    Auto-Migration: {'ENABLED' if AUTO_MIGRATE else 'DISABLED'}")
-    print(f"    OpenAI: {'ENABLED' if OPENAI_API_KEY else 'DISABLED'}")
+    print(f"    OpenAI: {'ENABLED' if openai_client else 'DISABLED'}")
     print("=" * 55)
     print(f"\nOpen: http://localhost:{port}")
     print("Login: developer / 192.168.1.1")
