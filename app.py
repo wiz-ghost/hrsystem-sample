@@ -15,7 +15,6 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 import openai
-from openai import OpenAI
 
 app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
@@ -26,16 +25,28 @@ AUTO_MIGRATE = os.environ.get('AUTO_MIGRATE', 'false').lower() == 'true'
 FLASK_DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
-# Configure OpenAI
+# Configure OpenAI - Works with both old and new versions
 openai_client = None
+OPENAI_AVAILABLE = False
+
 if OPENAI_API_KEY:
     try:
-        openai_client = OpenAI(api_key=OPENAI_API_KEY)
-        print(" OpenAI configured successfully")
-        print(f" API Key starts with: {OPENAI_API_KEY[:15]}...")
+        # Try new version first
+        try:
+            from openai import OpenAI
+            openai_client = OpenAI(api_key=OPENAI_API_KEY)
+            OPENAI_AVAILABLE = True
+            print(" OpenAI configured successfully (new version)")
+        except (ImportError, TypeError) as e:
+            print(f" New OpenAI version not available, trying old version: {e}")
+            # Try old version
+            openai.api_key = OPENAI_API_KEY
+            openai_client = openai
+            OPENAI_AVAILABLE = True
+            print(" OpenAI configured successfully (old version)")
     except Exception as e:
         print(f" OpenAI configuration error: {e}")
-        openai_client = None
+        OPENAI_AVAILABLE = False
 else:
     print(" OPENAI_API_KEY not found in environment variables")
 
@@ -45,7 +56,7 @@ print("=" * 55)
 print(f"Database Name: {DB_NAME}")
 print(f"Auto-Migration: {AUTO_MIGRATE}")
 print(f"Debug Mode: {FLASK_DEBUG}")
-print(f"OpenAI: {'Enabled' if openai_client else 'Disabled'}")
+print(f"OpenAI: {'Enabled' if OPENAI_AVAILABLE else 'Disabled'}")
 print("=" * 55)
 
 client = None
@@ -1811,8 +1822,38 @@ def delete_user(user_id):
         return jsonify({"error": "Failed to delete user"}), 500
 
 # ============================================================
-# AI ASSISTANT ROUTES - OpenAI Integration
+# AI ASSISTANT ROUTES - Works with both old and new OpenAI
 # ============================================================
+
+def call_openai(messages, temperature=0.3, max_tokens=300):
+    """Universal OpenAI caller that works with both old and new versions"""
+    if not OPENAI_AVAILABLE:
+        return None
+    
+    try:
+        # Try new version first
+        if hasattr(openai_client, 'chat') and hasattr(openai_client.chat, 'completions'):
+            response = openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            return response.choices[0].message.content.strip()
+        # Try old version
+        elif hasattr(openai_client, 'ChatCompletion'):
+            response = openai_client.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            return response.choices[0].message.content.strip()
+        else:
+            return None
+    except Exception as e:
+        print(f"OpenAI call failed: {e}")
+        return None
 
 @app.route('/api/ai/ask', methods=['POST'])
 @auth_required
@@ -1828,49 +1869,13 @@ def ai_ask():
                 "type": "error"
             })
         
-        if not openai_client:
-            return jsonify({
-                "success": False,
-                "message": "AI service is not configured. Please contact IT support.",
-                "type": "error"
-            })
-        
-        result = get_ai_response(question, request.user)
-        
-        log_activity(
-            user=request.user,
-            action='AI_QUERY',
-            details={
-                'question': question,
-                'result_type': result.get('type', 'unknown')
-            },
-            ip_address=request.remote_addr
-        )
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        print(f"AI API Error: {e}")
-        return jsonify({
-            "success": False,
-            "message": "Something went wrong. Please try again later.",
-            "type": "error"
-        })
-
-def get_ai_response(user_question, user_info=None):
-    try:
-        if not openai_client:
-            return {
-                "success": False,
-                "message": "AI service is not available. Please contact IT support.",
-                "type": "error"
-            }
-        
-        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        current_period = get_current_period()
-        today_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        
-        system_prompt = f"""You are an HR assistant for Silver Sands Salima.
+        # Try OpenAI first if available
+        if OPENAI_AVAILABLE:
+            try:
+                current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+                current_period = get_current_period()
+                
+                system_prompt = f"""You are an HR assistant for Silver Sands Salima.
 
 The database contains:
 - Employees: name, department, position, employee_no, join_date, day_off
@@ -1898,57 +1903,153 @@ Respond ONLY with a JSON object in this exact format:
 If the question is NOT about HR data:
 {{"operation": "general", "message": "I'm here to help with HR data."}}"""
 
-        try:
-            response = openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
+                ai_text = call_openai([
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_question}
-                ],
-                temperature=0.3,
-                max_tokens=300
-            )
-            ai_text = response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"OpenAI API call failed: {e}")
-            return {
-                "success": False,
-                "message": "The AI service is currently unavailable. Please try again later.",
-                "type": "error"
-            }
+                    {"role": "user", "content": question}
+                ])
+                
+                if ai_text:
+                    try:
+                        json_match = re.search(r'\{.*\}', ai_text, re.DOTALL)
+                        if json_match:
+                            action = json.loads(json_match.group())
+                        else:
+                            action = json.loads(ai_text)
+                        
+                        if action.get('operation') == 'general':
+                            return jsonify({
+                                "success": True,
+                                "message": action.get('message', "I'm here to help with HR data."),
+                                "type": "general"
+                            })
+                        
+                        result = execute_ai_operation(action)
+                        return jsonify(result)
+                    except Exception as e:
+                        print(f"JSON parsing error: {e}")
+                        # Fall through to keyword matching
+            except Exception as e:
+                print(f"OpenAI failed, using fallback: {e}")
+                # Fall through to keyword matching
         
-        try:
-            json_match = re.search(r'\{.*\}', ai_text, re.DOTALL)
-            if json_match:
-                action = json.loads(json_match.group())
+        # ============================================================
+        # KEYWORD MATCHING FALLBACK - WORKS WITHOUT ANY API KEY
+        # ============================================================
+        question_lower = question.lower()
+        
+        if 'attendance' in question_lower and 'summary' in question_lower:
+            period = get_current_period()
+            result = execute_ai_operation({
+                "operation": "get_attendance_summary",
+                "params": {"period": period}
+            })
+            return jsonify(result)
+        
+        elif 'absent' in question_lower:
+            period = get_current_period()
+            result = execute_ai_operation({
+                "operation": "get_absent_employees",
+                "params": {"period": period, "min_days": 1}
+            })
+            return jsonify(result)
+        
+        elif 'employee' in question_lower and ('list' in question_lower or 'all' in question_lower):
+            result = execute_ai_operation({
+                "operation": "get_all_employees",
+                "params": {}
+            })
+            return jsonify(result)
+        
+        elif 'department' in question_lower:
+            departments = ['admin', 'front office', 'food', 'housekeeping', 'maintenance', 'attachment', 'security']
+            dept_found = None
+            for dept in departments:
+                if dept in question_lower:
+                    dept_found = dept.title()
+                    break
+            
+            if dept_found:
+                result = execute_ai_operation({
+                    "operation": "get_employees_by_department",
+                    "params": {"department": dept_found}
+                })
+                return jsonify(result)
             else:
-                action = json.loads(ai_text)
-        except json.JSONDecodeError as e:
-            print(f"JSON parsing error: {e}")
-            print(f"Raw response: {ai_text}")
-            return {
+                result = execute_ai_operation({
+                    "operation": "get_department_attendance",
+                    "params": {"period": get_current_period()}
+                })
+                return jsonify(result)
+        
+        elif 'best' in question_lower or 'top' in question_lower:
+            period = get_current_period()
+            result = execute_ai_operation({
+                "operation": "get_best_attendance",
+                "params": {"period": period, "limit": 5}
+            })
+            return jsonify(result)
+        
+        elif 'worst' in question_lower or 'bottom' in question_lower:
+            period = get_current_period()
+            result = execute_ai_operation({
+                "operation": "get_worst_attendance",
+                "params": {"period": period, "limit": 5}
+            })
+            return jsonify(result)
+        
+        elif 'day off' in question_lower or 'off' in question_lower:
+            days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            day_found = None
+            for day in days:
+                if day in question_lower:
+                    day_found = day.title()
+                    break
+            
+            if day_found:
+                result = execute_ai_operation({
+                    "operation": "get_employees_by_day_off",
+                    "params": {"day": day_found}
+                })
+                return jsonify(result)
+            else:
+                return jsonify({
+                    "success": False,
+                    "message": "Please specify a day (Monday, Tuesday, etc.)",
+                    "type": "error"
+                })
+        
+        elif 'employee' in question_lower and 'attendance' in question_lower:
+            words = question.split()
+            common_words = ['show', 'me', 'for', 'the', 'of', 'in', 'at', 'employee', 'attendance', 'totals', 'summary', 'view', 'get', 'see']
+            name_candidates = [w for w in words if w.lower() not in common_words and len(w) > 2]
+            if name_candidates:
+                name = ' '.join(name_candidates)
+                result = execute_ai_operation({
+                    "operation": "get_employee_attendance_totals",
+                    "params": {"employee_name": name}
+                })
+                return jsonify(result)
+            else:
+                return jsonify({
+                    "success": False,
+                    "message": "Please specify an employee name.",
+                    "type": "error"
+                })
+        
+        else:
+            return jsonify({
                 "success": False,
-                "message": "I couldn't understand that. Please try rephrasing.",
+                "message": "Try: 'Show me attendance summary', 'Who was absent today?', 'List Front Office employees'",
                 "type": "error"
-            }
-        
-        if action.get('operation') == 'general':
-            return {
-                "success": True,
-                "message": action.get('message', "I'm here to help with HR data."),
-                "type": "general"
-            }
-        
-        result = execute_ai_operation(action)
-        return result
+            })
         
     except Exception as e:
-        print(f"AI Error: {e}")
-        return {
+        print(f"AI API Error: {e}")
+        return jsonify({
             "success": False,
-            "message": "Sorry, I'm having trouble right now. Please try again later.",
+            "message": "Something went wrong. Please try again later.",
             "type": "error"
-        }
+        })
 
 def execute_ai_operation(action):
     operation = action.get('operation')
@@ -2447,7 +2548,7 @@ if __name__ == '__main__':
     print(f"    Database: MongoDB Atlas")
     print(f"    Mode: {'Development' if FLASK_DEBUG else 'Production'}")
     print(f"    Auto-Migration: {'ENABLED' if AUTO_MIGRATE else 'DISABLED'}")
-    print(f"    OpenAI: {'ENABLED' if openai_client else 'DISABLED'}")
+    print(f"    OpenAI: {'ENABLED' if OPENAI_AVAILABLE else 'DISABLED'}")
     print("=" * 55)
     print(f"\nOpen: http://localhost:{port}")
     print("Login: developer / 192.168.1.1")
